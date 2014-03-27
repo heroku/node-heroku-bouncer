@@ -56,3 +56,6 @@ To log a user out, send them to `/auth/heroku/logout`.
 ```sh
 $ npm test
 ```
+
+[cookieParser]:  http://expressjs.com/3x/api.html#cookieParser
+[cookieSession]: http://expressjs.com/3x/api.html#cookieSession
