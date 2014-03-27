@@ -17,7 +17,7 @@ your app. To set it up, pass it your OAuth client ID and secret and another
 secret used to encrypt your user's OAuth session data.
 
 Use the `bouncer.middleware` object to set up middleware that will ensure that
-your users are logged in (and redirect otherwise), and the `bouncer.roues`
+your users are logged in (and redirect otherwise), and the `bouncer.routes`
 object to add the OAuth-specific routes to your app:
 
 ```javascript
