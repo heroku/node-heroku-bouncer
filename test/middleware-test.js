@@ -103,15 +103,41 @@ describe('bouncer', function() {
   });
 
   describe('ignoring routes', function() {
-    it('ignores specified routes', function(done) {
-      request({
-        url: 'http://localhost:' + clientPort + '/ignore',
-        followRedirect: false
-      }, function(err, res) {
-        if (err) throw err;
+    context('when there is no user session', function() {
+      it('ignores specified routes', function(done) {
+        request({
+          url: 'http://localhost:' + clientPort + '/ignore',
+          followRedirect: false
+        }, function(err, res) {
+          if (err) throw err;
 
-        res.body.should.eql('no redirect');
-        done();
+          res.body.should.eql('no redirect');
+          done();
+        });
+      });
+    });
+
+    context('when there is a user session', function() {
+      it('uses its normal middleware', function(done) {
+        var jar = request.jar();
+
+        request({
+          jar: jar,
+          url: 'http://localhost:' + clientPort
+        }, function(err, res) {
+          if (err) throw err;
+
+          request({
+            jar: jar,
+            url: 'http://localhost:' + clientPort + '/ignore-with-session',
+            followRedirect: false
+          }, function(err, res) {
+            if (err) throw err;
+
+            res.body.should.eql('access_token');
+            done();
+          });
+        });
       });
     });
   });

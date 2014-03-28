@@ -37,5 +37,9 @@ module.exports = function(serverPort) {
     res.end('no redirect');
   });
 
+  app.get('/ignore-with-session', function(req, res) {
+    res.end(req['heroku-bouncer'].token);
+  });
+
   return server;
 }

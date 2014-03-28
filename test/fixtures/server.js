@@ -7,7 +7,7 @@ var app     = express();
 var server  = http.createServer(app);
 
 app.post('/oauth/token', function(req, res) {
-  res.end(JSON.stringify({ access_token: 'foo' }));
+  res.end(JSON.stringify({ access_token: 'access_token' }));
 });
 
 app.get('*', function(req, res) {
