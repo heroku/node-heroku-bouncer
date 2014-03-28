@@ -26,5 +26,9 @@ function enforceOptions(options) {
     throw new Error('No `herokuOAuthSecret` provided to heroku-bouncer');
   }
 
+  if (!options.hasOwnProperty('ignoreRoutes')) {
+    options.ignoreRoutes = [];
+  }
+
   options.herokuAuthURL || (options.herokuAuthURL = 'https://id.heroku.com');
 }

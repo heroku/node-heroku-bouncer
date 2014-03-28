@@ -101,4 +101,18 @@ describe('bouncer', function() {
       });
     });
   });
+
+  describe('ignoring routes', function() {
+    it('ignores specified routes', function(done) {
+      request({
+        url: 'http://localhost:' + clientPort + '/ignore',
+        followRedirect: false
+      }, function(err, res) {
+        if (err) throw err;
+
+        res.body.should.eql('no redirect');
+        done();
+      });
+    });
+  });
 });

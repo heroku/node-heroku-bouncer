@@ -10,7 +10,8 @@ module.exports = function(serverPort) {
     herokuOAuthID      : 'client-id',
     herokuOAuthSecret  : 'client-secret',
     herokuBouncerSecret: 'bouncer-secret',
-    herokuAuthURL      : 'http://localhost:' + serverPort
+    herokuAuthURL      : 'http://localhost:' + serverPort,
+    ignoreRoutes       : [/^\/ignore/]
   });
 
   app.use(express.cookieParser('cookie secret'));
@@ -30,6 +31,10 @@ module.exports = function(serverPort) {
 
   app.get('/hello', function(req, res) {
     res.end('hello world');
+  });
+
+  app.get('/ignore', function(req, res) {
+    res.end('no redirect');
   });
 
   return server;
