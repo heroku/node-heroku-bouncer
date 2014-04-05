@@ -19,7 +19,8 @@
   "dependencies": {
     "encryptor": "~0.1.0",
     "oauth": "~0.9.11",
-    "express": "~3.5.1"
+    "express": "~3.5.1",
+    "heroku-client": "^1.2.0"
   },
   "devDependencies": {
     "mocha": "~1.18.2",
