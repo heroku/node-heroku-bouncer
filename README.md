@@ -33,7 +33,7 @@ app.use(express.cookieSession({
     httpOnly: true,
     maxAge  : null
   }
-});
+}));
 
 var bouncer = require('heroku-bouncer')({
   herokuOAuthID      : 'client-id',
