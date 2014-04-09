@@ -28,7 +28,7 @@ app.use(express.cookieParser('your cookie secret'));
 app.use(express.cookieSession({
   secret: 'your session secret',
   cookie: {
-    path    : '/'
+    path    : '/',
     signed  : true,
     httpOnly: true,
     maxAge  : null
