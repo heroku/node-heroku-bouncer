@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "mocha": "~1.18.2",
-    "should": "~3.2.0-beta1",
-    "request": "~2.34.0"
+    "request": "~2.34.0",
+    "should": "~3.2.0-beta1"
   }
 }
