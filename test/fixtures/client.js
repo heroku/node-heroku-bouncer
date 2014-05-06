@@ -1,10 +1,10 @@
 'use strict';
 
-var express = require('express');
-var http    = require('http');
-var heroku  = require('../helpers/heroku');
-var app     = express();
-var server  = http.createServer(app);
+var express  = require('express');
+var http     = require('http');
+var heroku   = require('../helpers/heroku');
+var app      = express();
+var server   = http.createServer(app);
 
 module.exports = function(serverPort) {
   var bouncer = require('../../index')({
@@ -15,15 +15,16 @@ module.exports = function(serverPort) {
     ignoreRoutes       : [/^\/ignore/]
   });
 
-  app.use(express.cookieParser('cookie secret'));
 
-  app.use(express.cookieSession({
+  app.use(require('cookie-parser')('cookie secret'));
+
+  app.use(require('client-sessions')({
+    cookieName: 'session',
     secret: 'cookie session secret',
     cookie: {
-      path    : '/',
-      signed  : true,
+      path: '/',
       httpOnly: true,
-      maxAge  : null
+      secure: false
     }
   }));
 
