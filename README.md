@@ -41,6 +41,14 @@ var bouncer = require('heroku-bouncer')({
   herokuBouncerSecret: 'bouncer-secret'
 });
 
+// Optional parameter:
+
+// `herokaiOnly`: Default value: false. It can accepts a request handler:
+
+```js
+herokaiOnly: function(req, res) { /* ... */ }
+```
+
 app.use(bouncer.middleware);
 app.use(bouncer.router);
 
