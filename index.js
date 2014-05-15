@@ -31,6 +31,5 @@ function enforceOptions(options) {
   }
 
   options.herokuAuthURL || (options.herokuAuthURL = 'https://id.heroku.com');
-
-  options.herokaiOnly || (options.herokaiOnly = false);
+  options.herokaiOnly   || (options.herokaiOnly   = false);
 }
