@@ -43,10 +43,10 @@ var bouncer = require('heroku-bouncer')({
 
 // Optional parameter:
 
-// `herokaiOnly`: Default value: false. It can accepts a request handler:
+// `herokaiOnly`: Default value: false. It can accepts a request handler. Example:
 
 ```js
-herokaiOnly: function(req, res) { /* ... */ }
+herokaiOnly : function(req, res, next) { res.end('ok'); }
 ```
 
 app.use(bouncer.middleware);
