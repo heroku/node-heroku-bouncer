@@ -1,18 +1,12 @@
 'use strict';
 
-var express = require('express');
-var http    = require('http');
-var app     = express();
-var server  = http.createServer(app);
+var express        = require('express');
+var http           = require('http');
+var app            = express();
+var server         = http.createServer(app);
 
-module.exports = function(serverPort) {
-  var bouncer = require('../../index')({
-    herokuOAuthID      : 'client-id',
-    herokuOAuthSecret  : 'client-secret',
-    herokuBouncerSecret: 'bouncer-secret',
-    herokuAuthURL      : 'http://localhost:' + serverPort,
-    ignoreRoutes       : [/^\/ignore/]
-  });
+module.exports = function(serverPort, options) {
+  var bouncer = require('../../index')(options);
 
   app.use(express.cookieParser('cookie secret'));
 
