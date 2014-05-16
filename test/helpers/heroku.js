@@ -1,5 +1,5 @@
 var Heroku      = require('heroku-client');
-var defaultUser = { email: 'user@example.com', name: 'Jane Smit' };
+var defaultUser = { email: 'user@example.com', name: 'Jane Smith' };
 var currentUser = defaultUser;
 
 Heroku.prototype.account = function() {

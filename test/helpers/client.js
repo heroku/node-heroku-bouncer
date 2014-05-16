@@ -1,38 +1,34 @@
-var server          = require('../fixtures/server');
-var objectMerge     = require('object-merge');
+var server       = require('../fixtures/server');
+var createClient = require('../fixtures/client');
 
-server.listen(0);
+server.listen();
 
-var serverPort      = server.address().port;
+exports.createClient = function(options, cb) {
+  var defaultOptions = {
+    herokuOAuthID      : 'client-id',
+    herokuOAuthSecret  : 'client-secret',
+    herokuBouncerSecret: 'bouncer-secret',
+    herokuAuthURL      : 'http://localhost:' + server.address().port,
+    ignoreRoutes       : [/^\/ignore/],
+    herokaiOnly        : false
+  };
 
-var defaultOptions  = {
-      herokuOAuthID      : 'client-id',
-      herokuOAuthSecret  : 'client-secret',
-      herokuBouncerSecret: 'bouncer-secret',
-      herokuAuthURL      : 'http://localhost:' + serverPort,
-      ignoreRoutes       : [/^\/ignore/]
+  options = options || {};
+
+  for (var key in defaultOptions) {
+    if (!options.hasOwnProperty(key)) {
+      options[key] = defaultOptions[key];
     }
+  }
 
-var clientPort;
-var client;
-
-exports.boot = function(options) {
-  var options = objectMerge(options, defaultOptions);
-
-  client = require('../fixtures/client')(server.address().port, options);
-  client.listen(0);
-  clientPort = client.address().port;
-  return server.clientPort = clientPort;
+  var client = createClient(options);
+  client.serverPort = server.address().port;
+  client.listen(function() {
+    server.clientPort = client.address().port;
+    cb(null, client);
+  });
 };
 
-exports.kill = function() {
-  client.close();
-}
-
 exports.port = function() {
-  return clientPort;
-}
-
-exports.serverPort = function() {
-  return serverPort;
-}
+  return client.address().port;
+};

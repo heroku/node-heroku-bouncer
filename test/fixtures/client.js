@@ -1,11 +1,11 @@
 'use strict';
 
-var express        = require('express');
-var http           = require('http');
-var app            = express();
-var server         = http.createServer(app);
+var express = require('express');
+var http    = require('http');
 
-module.exports = function(serverPort, options) {
+module.exports = function(options) {
+  var app     = express();
+  var server  = http.createServer(app);
   var bouncer = require('../../index')(options);
 
   app.use(express.cookieParser('cookie secret'));
