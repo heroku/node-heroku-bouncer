@@ -2,19 +2,11 @@
 
 var express  = require('express');
 var http     = require('http');
-var heroku   = require('../helpers/heroku');
-var app      = express();
-var server   = http.createServer(app);
 
-module.exports = function(serverPort) {
-  var bouncer = require('../../index')({
-    herokuOAuthID      : 'client-id',
-    herokuOAuthSecret  : 'client-secret',
-    herokuBouncerSecret: 'bouncer-secret',
-    herokuAuthURL      : 'http://localhost:' + serverPort,
-    ignoreRoutes       : [/^\/ignore/]
-  });
-
+module.exports = function(options) {
+  var app     = express();
+  var server  = http.createServer(app);
+  var bouncer = require('../../index')(options);
 
   app.use(require('cookie-parser')('cookie secret'));
 
@@ -44,4 +36,4 @@ module.exports = function(serverPort) {
   });
 
   return server;
-}
+};

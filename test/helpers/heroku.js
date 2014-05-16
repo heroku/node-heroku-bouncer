@@ -1,13 +1,21 @@
-var Heroku = require('heroku-client');
+var Heroku      = require('heroku-client');
+var defaultUser = { email: 'user@example.com', name: 'Jane Smith' };
+var currentUser = defaultUser;
 
 Heroku.prototype.account = function() {
   return {
     info: function(cb) {
       process.nextTick(function() {
-        cb(null, { email: 'user@example.com', name: 'Jane Smith' });
+        cb(null, currentUser);
       });
     }
   };
 };
 
-module.exports = Heroku;
+exports.stubUser = function(user) {
+  currentUser = user;
+};
+
+exports.reset = function() {
+  currentUser = defaultUser;
+};
