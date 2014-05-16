@@ -6,15 +6,7 @@ var app            = express();
 var server         = http.createServer(app);
 
 module.exports = function(serverPort, options) {
-  var defaultOptions = {
-        herokuOAuthID      : 'client-id',
-        herokuOAuthSecret  : 'client-secret',
-        herokuBouncerSecret: 'bouncer-secret',
-        herokuAuthURL      : 'http://localhost:' + serverPort,
-        ignoreRoutes       : [/^\/ignore/]
-      }
-
-  var bouncer = require('../../index')(options || defaultOptions);
+  var bouncer = require('../../index')(options);
 
   app.use(express.cookieParser('cookie secret'));
 
