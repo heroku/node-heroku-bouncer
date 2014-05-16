@@ -6,7 +6,8 @@ var should  = require('should');
 describe('bouncer', function() {
   var herokuStub = require('./helpers/heroku');
   var client     = require('./helpers/client');
-  client.boot(0);
+
+  client.boot();
 
   describe('when not logged in', function() {
     context('when user is herokai', function(){
@@ -15,8 +16,8 @@ describe('bouncer', function() {
       });
 
       context('and herokaiOnly is true', function(){
-        // client.boot({ herokaiOnly: true });
-        // client.kill();
+        client.boot({ herokaiOnly: true });
+        client.kill();
       });
 
       context('and herokaiOnly is false', function(){
@@ -51,7 +52,9 @@ describe('bouncer', function() {
       });
     });
 
-    // client.boot();
+    // Restore connection
+    // client.kill();
+    client.boot();
 
     it('redirects to /auth/heroku', function(done) {
       request({
@@ -77,14 +80,9 @@ describe('bouncer', function() {
         done();
       });
     });
-
-    // client.kill();
-
   });
 
   describe('when logged in', function() {
-    // client.boot();
-
     it('does not redirect', function(done) {
       var jar = request.jar();
 
@@ -106,13 +104,9 @@ describe('bouncer', function() {
         });
       });
     });
-
-    // client.kill();
   });
 
   describe('logging out', function() {
-    // client.boot();
-
     it('redirects to the ID logout path', function(done) {
       request({
         jar: true,
@@ -147,14 +141,9 @@ describe('bouncer', function() {
         });
       });
     });
-
-    // client.kill();
-
   });
 
   describe('ignoring routes', function() {
-    // client.boot();
-
     context('when there is no user session', function() {
       it('ignores specified routes', function(done) {
         request({
