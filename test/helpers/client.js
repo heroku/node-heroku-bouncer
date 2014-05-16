@@ -16,13 +16,13 @@ var defaultOptions  = {
 var clientPort;
 var client;
 
-exports.boot = function(port, options) {
+exports.boot = function(options) {
   var options = objectMerge(options, defaultOptions);
 
   client = require('../fixtures/client')(server.address().port,options);
-  client.listen(port);
+  client.listen(0);
   clientPort = client.address().port;
-  server.clientPort = clientPort;  
+  return server.clientPort = clientPort;
 };
 
 exports.kill = function() {
