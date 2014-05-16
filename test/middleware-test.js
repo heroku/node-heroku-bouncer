@@ -12,7 +12,7 @@ describe('bouncer', function() {
   describe('when not logged in', function() {
     context('when user is herokai', function(){
       beforeEach(function(){
-        herokuStub.stubUser("herokai@heroku.com");
+        herokuStub.stubUser({ email: "herokai@heroku.com", name: "Rocky Balboa" });
       });
 
       context('and herokaiOnly is true', function(){
