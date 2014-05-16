@@ -11,49 +11,59 @@ describe('bouncer', function() {
 
   describe('when not logged in', function() {
     context('when user is herokai', function(){
-      beforeEach(function() {
+      beforeEach(function(){
         herokuStub.stubUser("herokai@heroku.com");
       });
 
+      context('and herokaiOnly is true', function(){
+        client.kill();
+        client.boot({ herokaiOnly: true });
+
+        it('redirects to /auth/heroku', function(done) {
+          request({
+            jar: true,
+            url: 'http://localhost:' + client.port(),
+            followRedirect: false
+          }, function(err, res) {
+            if (err) throw err;
+
+            res.headers['location'].should.eql('/auth/heroku')
+            done();
+          });
+        });
+
+        client.kill();
+      });
+
+      context('and herokaiOnly is false', function(){
+        client.boot({ herokaiOnly: false });
+        client.kill();
+      });
+
+      context('and herokaiOnly is a request handler', function(){
+        client.boot({ herokaiOnly: function(req, res, next) { res.end('ok'); } });
+        client.kill();
+      });
+    });
+
+    context('when user is not herokai', function(){
       context('and herokaiOnly is true', function(){
         client.boot({ herokaiOnly: true });
         client.kill();
       });
 
       context('and herokaiOnly is false', function(){
-        // client.boot({ herokaiOnly: false });
-        // client.kill();
+        client.boot({ herokaiOnly: false });
+        client.kill();
       });
 
       context('and herokaiOnly is a request handler', function(){
-        // client.boot({ herokaiOnly: function(req, res, next) { res.end('ok'); } });
-        // client.kill();
-      });
-    });
-
-    context('when user is not herokai', function(){
-      beforeEach(function() {
-        herokuStub.stubUser("user@email.com");
-      });
-
-      context('and herokaiOnly is true', function(){
-        // client.boot({ herokaiOnly: true });
-        // client.kill();
-      });
-
-      context('and herokaiOnly is false', function(){
-        // client.boot({ herokaiOnly: false });
-        // client.kill();
-      });
-
-      context('and herokaiOnly is a request handler', function(){
-        // client.boot({ herokaiOnly: function(req, res, next) { res.end('ok'); } });
-        // client.kill();
+        client.boot({ herokaiOnly: function(req, res, next) { res.end('ok'); } });
+        client.kill();
       });
     });
 
     // Restore connection
-    // client.kill();
     client.boot();
 
     it('redirects to /auth/heroku', function(done) {

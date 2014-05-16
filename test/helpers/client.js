@@ -19,7 +19,7 @@ var client;
 exports.boot = function(options) {
   var options = objectMerge(options, defaultOptions);
 
-  client = require('../fixtures/client')(server.address().port,options);
+  client = require('../fixtures/client')(server.address().port, options);
   client.listen(0);
   clientPort = client.address().port;
   return server.clientPort = clientPort;
