@@ -1,3 +1,5 @@
+'use strict';
+
 var Heroku      = require('heroku-client');
 var defaultUser = { email: 'user@example.com', name: 'Jane Smith' };
 var currentUser = defaultUser;

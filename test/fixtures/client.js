@@ -1,22 +1,22 @@
 'use strict';
 
-var express = require('express');
-var http    = require('http');
+var express  = require('express');
+var http     = require('http');
 
 module.exports = function(options) {
   var app     = express();
   var server  = http.createServer(app);
   var bouncer = require('../../index')(options);
 
-  app.use(express.cookieParser('cookie secret'));
+  app.use(require('cookie-parser')('cookie secret'));
 
-  app.use(express.cookieSession({
+  app.use(require('client-sessions')({
+    cookieName: 'session',
     secret: 'cookie session secret',
     cookie: {
-      path    : '/',
-      signed  : true,
+      path: '/',
       httpOnly: true,
-      maxAge  : null
+      secure: false
     }
   }));
 
@@ -36,4 +36,4 @@ module.exports = function(options) {
   });
 
   return server;
-}
+};

@@ -1,3 +1,5 @@
+'use strict';
+
 var server       = require('../fixtures/server');
 var createClient = require('../fixtures/client');
 
@@ -27,8 +29,4 @@ exports.createClient = function(options, cb) {
     server.clientPort = client.address().port;
     cb(null, client);
   });
-};
-
-exports.port = function() {
-  return client.address().port;
 };

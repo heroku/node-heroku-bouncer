@@ -1,3 +1,5 @@
+'use strict';
+
 var request = require('request');
 
 exports.shouldNotRedirect = function(client, done) {
@@ -6,7 +8,7 @@ exports.shouldNotRedirect = function(client, done) {
   request({
     jar: jar,
     url: 'http://localhost:' + client.address().port
-  }, function(err, res) {
+  }, function(err) {
     if (err) throw err;
 
     request({
@@ -28,7 +30,7 @@ exports.shouldRedirect = function(client, done) {
   request({
     jar: jar,
     url: 'http://localhost:' + client.address().port
-  }, function(err, res) {
+  }, function(err) {
     if (err) throw err;
 
     request({
@@ -38,7 +40,7 @@ exports.shouldRedirect = function(client, done) {
     }, function(err, res) {
       if (err) throw err;
 
-      res.headers['location'].should.eql('https://www.heroku.com')
+      res.headers.location.should.eql('https://www.heroku.com');
       done();
     });
   });

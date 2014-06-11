@@ -19,12 +19,41 @@
   "dependencies": {
     "encryptor": "~0.1.0",
     "oauth": "~0.9.11",
-    "express": "~3.5.1",
+    "express": "~4.1.1",
     "heroku-client": "^1.2.0"
   },
   "devDependencies": {
+    "client-sessions": "^0.6.0",
+    "cookie-parser": "^1.0.1",
     "mocha": "~1.18.2",
     "request": "~2.34.0",
     "should": "~3.2.0-beta1"
+  },
+  "jshintConfig": {
+    "eqeqeq"      : true,
+    "forin"       : true,
+    "globalstrict": true,
+    "immed"       : true,
+    "indent"      : 2,
+    "latedef"     : "nofunc",
+    "newcap"      : true,
+    "noarg"       : true,
+    "quotmark"    : "single",
+    "strict"      : true,
+    "trailing"    : true,
+    "undef"       : true,
+    "unused"      : true,
+    "globals"     : {
+      "afterEach" : false,
+      "before"    : false,
+      "beforeEach": false,
+      "context"   : false,
+      "describe"  : false,
+      "exports"   : false,
+      "it"        : false,
+      "module"    : false,
+      "process"   : false,
+      "require"   : false
+    }
   }
 }
