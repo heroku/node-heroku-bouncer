@@ -1,10 +1,10 @@
 'use strict';
 
-var middleware    = require('./lib/middleware');
-var router        = require('./lib/router');
+var middleware = require('./lib/middleware');
+var router     = require('./lib/router');
 
 module.exports = function(options) {
-  options || (options = {});
+  options = options || {};
   enforceOptions(options);
 
   return {
@@ -30,6 +30,6 @@ function enforceOptions(options) {
     options.ignoreRoutes = [];
   }
 
-  options.herokuAuthURL || (options.herokuAuthURL = 'https://id.heroku.com');
-  options.herokaiOnly   || (options.herokaiOnly   = false);
+  options.herokuAuthURL = options.herokuAuthURL || 'https://id.heroku.com';
+  options.herokaiOnly   = options.herokaiOnly || false;
 }

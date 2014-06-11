@@ -5,7 +5,7 @@ var should       = require('should');
 var herokuStub   = require('./helpers/heroku');
 var clientHelper = require('./helpers/client');
 var shared       = require('./helpers/shared');
-var reqHandler   = function(req, res, next) { res.end('custom handler'); };
+var reqHandler   = function(req, res) { res.end('custom handler'); };
 var client;
 
 describe('bouncer', function() {
@@ -29,7 +29,7 @@ describe('bouncer', function() {
       }, function(err, res) {
         if (err) throw err;
 
-        res.headers['location'].should.eql('/auth/heroku')
+        res.headers.location.should.eql('/auth/heroku');
         done();
       });
     });
@@ -77,7 +77,7 @@ describe('bouncer', function() {
             request({
               jar: jar,
               url: 'http://localhost:' + client.address().port,
-            }, function(err, res) {
+            }, function(err) {
               if (err) throw err;
 
               request({
@@ -113,7 +113,7 @@ describe('bouncer', function() {
             request({
               jar: jar,
               url: 'http://localhost:' + client.address().port,
-            }, function(err, res) {
+            }, function(err) {
               if (err) throw err;
 
               request.post({
@@ -165,7 +165,7 @@ describe('bouncer', function() {
           request({
             jar: jar,
             url: 'http://localhost:' + client.address().port,
-          }, function(err, res) {
+          }, function(err) {
             if (err) throw err;
 
             request.post({
@@ -198,7 +198,7 @@ describe('bouncer', function() {
       request({
         jar: jar,
         url: 'http://localhost:' + client.address().port
-      }, function(err, res) {
+      }, function(err) {
         if (err) throw err;
 
         request({
@@ -208,7 +208,7 @@ describe('bouncer', function() {
         }, function(err, res) {
           if (err) throw err;
 
-          res.headers['location'].should.eql('http://localhost:' + client.serverPort + '/logout');
+          res.headers.location.should.eql('http://localhost:' + client.serverPort + '/logout');
           done();
         });
       });
@@ -220,13 +220,13 @@ describe('bouncer', function() {
       request({
         jar: jar,
         url: 'http://localhost:' + client.address().port
-      }, function(err, res) {
+      }, function(err) {
         if (err) throw err;
 
         request({
           jar: jar,
           url: 'http://localhost:' + client.address().port + '/auth/heroku/logout'
-        }, function(err, res) {
+        }, function(err) {
           if (err) throw err;
 
           var cookies = jar.getCookieString('http://localhost:' + client.address().port);
@@ -263,7 +263,7 @@ describe('bouncer', function() {
         request({
           jar: jar,
           url: 'http://localhost:' + client.address().port
-        }, function(err, res) {
+        }, function(err) {
           if (err) throw err;
 
           request({
