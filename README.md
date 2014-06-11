@@ -1,7 +1,7 @@
 # node-heroku-bouncer
 
 node-heroku-bouncer is an easy-to-use module for adding Heroku OAuth
-authentication to express apps.
+authentication to express 4 apps.
 
 ## Install
 
