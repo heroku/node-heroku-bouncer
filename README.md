@@ -11,10 +11,10 @@ $ npm install heroku-bouncer --save
 
 ## Use
 
-node-heroku-bouncer assumes you've already added the express
-[cookieParser][cookieParser] and [cookieSession][cookieSession] middlewares to
-your app. To set it up, pass it your OAuth client ID and secret and another
-secret used to encrypt your user's OAuth session data.
+node-heroku-bouncer assumes you've already added [cookie-parser][cookieParser]
+and [client-sessions][clientSessions] middlewares to your app. To set it up,
+pass it your OAuth client ID and secret and another secret used to encrypt your
+user's OAuth session data.
 
 Use the `bouncer.middleware` object to set up middleware that will ensure that
 your users are logged in (and redirect otherwise), and the `bouncer.routes`
@@ -81,5 +81,5 @@ To log a user out, send them to `/auth/heroku/logout`.
 $ npm test
 ```
 
-[cookieParser]:  http://expressjs.com/3x/api.html#cookieParser
-[cookieSession]: http://expressjs.com/3x/api.html#cookieSession
+[cookieParser]:   https://github.com/expressjs/cookie-parser
+[clientSessions]: https://github.com/mozilla/node-client-sessions
