@@ -1,19 +1,30 @@
 'use strict';
 
-var request      = require('request');
-var should       = require('should');
-var herokuStub   = require('./helpers/heroku');
-var clientHelper = require('./helpers/client');
-var shared       = require('./helpers/shared');
-var reqHandler   = function(req, res) { res.end('custom handler'); };
+var Promise           = require('bluebird');
+var request           = require('request');
+var should            = require('should');
+var herokuStub        = require('./helpers/heroku');
+var clientHelper      = require('./helpers/client');
+var shared            = require('./helpers/shared');
+var get               = Promise.promisify(request.get);
+var post              = Promise.promisify(request.post);
+var reqHandler        = function(req, res) { res.end('custom handler'); };
 var client;
 
 describe('bouncer', function() {
+  var shouldNotRedirect, shouldRedirect;
+
+  before(function() {
+    shouldNotRedirect = shared.shouldNotRedirect.bind(this);
+    shouldRedirect    = shared.shouldRedirect.bind(this);
+  });
+
   beforeEach(function(done) {
     clientHelper.createClient(this.clientOptions, function(err, newClient) {
-      client = newClient;
+      this.url = 'http://localhost:' + newClient.address().port;
+      client   = newClient;
       done();
-    });
+    }.bind(this));
   });
 
   afterEach(function(done) {
@@ -21,24 +32,21 @@ describe('bouncer', function() {
   });
 
   describe('when not logged in', function() {
-    it('redirects to /auth/heroku', function(done) {
-      request({
-        jar: true,
-        url: 'http://localhost:' + client.address().port,
+    it('redirects to /auth/heroku', function() {
+      return get({
+        jar           : true,
+        url           : this.url,
         followRedirect: false
-      }, function(err, res) {
-        if (err) throw err;
-
+      }).spread(function(res) {
         res.headers.location.should.eql('/auth/heroku');
-        done();
       });
     });
   });
 
   describe('when logged in', function() {
     context('and herokaiOnly is not set', function() {
-      it('does not redirect', function(done) {
-        shared.shouldNotRedirect(client, done);
+      it('does not redirect', function() {
+        return shouldNotRedirect(client);
       });
     });
 
@@ -52,8 +60,8 @@ describe('bouncer', function() {
           herokuStub.stubUser({ email: 'user@heroku.com' });
         });
 
-        it('does not redirect', function(done) {
-          shared.shouldNotRedirect(client, done);
+        it('does not redirect', function() {
+          return shouldNotRedirect(client);
         });
       });
 
@@ -63,35 +71,31 @@ describe('bouncer', function() {
         });
 
         context('and the request is an HTML GET', function() {
-          it('does a redirect', function(done) {
-            shared.shouldRedirect(client, done);
+          it('does a redirect', function() {
+            return shouldRedirect(client);
           });
         });
 
         context('and the request is a non-HTML GET', function() {
           var lastRes;
 
-          beforeEach(function(done) {
+          beforeEach(function() {
             var jar = request.jar();
 
-            request({
+            return get({
               jar: jar,
-              url: 'http://localhost:' + client.address().port,
-            }, function(err) {
-              if (err) throw err;
-
-              request({
-                jar: jar,
-                url: 'http://localhost:' + client.address().port + '/hello',
-                headers: {
+              url: this.url
+            }).then(function() {
+              return get({
+                jar           : jar,
+                url           : this.url + '/hello',
+                followRedirect: false,
+                headers       : {
                   'content-type': 'application/json'
-                },
-                followRedirect: false
-              }, function(err, res) {
-                if (err) throw err;
-                lastRes = res;
-                done();
+                }
               });
+            }.bind(this)).spread(function(res) {
+              lastRes = res;
             });
           });
 
@@ -107,24 +111,20 @@ describe('bouncer', function() {
         context('and the request is not a GET', function() {
           var lastRes;
 
-          beforeEach(function(done) {
+          beforeEach(function() {
             var jar = request.jar();
 
-            request({
+            return get({
               jar: jar,
-              url: 'http://localhost:' + client.address().port,
-            }, function(err) {
-              if (err) throw err;
-
-              request.post({
-                jar: jar,
-                url: 'http://localhost:' + client.address().port + '/hello',
+              url: this.url
+            }).then(function() {
+              return post({
+                jar           : jar,
+                url           : this.url + '/hello',
                 followRedirect: false
-              }, function(err, res) {
-                if (err) throw err;
-                lastRes = res;
-                done();
               });
+            }.bind(this)).spread(function(res) {
+              lastRes = res;
             });
           });
 
@@ -149,34 +149,30 @@ describe('bouncer', function() {
           herokuStub.stubUser({ email: 'user@heroku.com' });
         });
 
-        it('does not redirect', function(done) {
-          shared.shouldNotRedirect(client, done);
+        it('does not redirect', function() {
+          return shouldNotRedirect(client);
         });
       });
 
       context('and the user is not a herokai', function() {
         var lastRes;
 
-        beforeEach(function(done) {
+        beforeEach(function() {
           herokuStub.stubUser({ email: 'user@example.com' });
 
           var jar = request.jar();
 
-          request({
+          return get({
             jar: jar,
-            url: 'http://localhost:' + client.address().port,
-          }, function(err) {
-            if (err) throw err;
-
-            request.post({
-              jar: jar,
-              url: 'http://localhost:' + client.address().port + '/hello',
+            url: this.url
+          }).then(function() {
+            return post({
+              jar           : jar,
+              url           : this.url + '/hello',
               followRedirect: false
-            }, function(err, res) {
-              if (err) throw err;
-              lastRes = res;
-              done();
             });
+          }.bind(this)).spread(function(res) {
+            lastRes = res;
           });
         });
 
@@ -192,48 +188,38 @@ describe('bouncer', function() {
       this.clientOptions = null;
     });
 
-    it('redirects to the ID logout path', function(done) {
+    it('redirects to the ID logout path', function() {
       var jar = request.jar();
 
-      request({
+      return get({
         jar: jar,
-        url: 'http://localhost:' + client.address().port
-      }, function(err) {
-        if (err) throw err;
-
-        request({
-          jar: jar,
-          url: 'http://localhost:' + client.address().port + '/auth/heroku/logout',
+        url: this.url
+      }).then(function() {
+        return get({
+          jar           : jar,
+          url           : this.url + '/auth/heroku/logout',
           followRedirect: false
-        }, function(err, res) {
-          if (err) throw err;
-
-          res.headers.location.should.eql('http://localhost:' + client.serverPort + '/logout');
-          done();
         });
+      }.bind(this)).spread(function(res) {
+        res.headers.location.should.eql('http://localhost:' + client.serverPort + '/logout');
       });
     });
 
-    it('nullifies the session', function(done) {
+    it('nullifies the session', function() {
       var jar = request.jar();
 
-      request({
+      return get({
         jar: jar,
-        url: 'http://localhost:' + client.address().port
-      }, function(err) {
-        if (err) throw err;
-
-        request({
+        url: this.url
+      }).then(function() {
+        return get({
           jar: jar,
-          url: 'http://localhost:' + client.address().port + '/auth/heroku/logout'
-        }, function(err) {
-          if (err) throw err;
-
-          var cookies = jar.getCookieString('http://localhost:' + client.address().port);
-          should(cookies.match(/userSession/)).eql(null);
-          done();
+          url: this.url + '/auth/heroku/logout'
         });
-      });
+      }.bind(this)).then(function() {
+        var cookies = jar.getCookieString(this.url);
+        should(cookies.match(/userSession/)).eql(null);
+      }.bind(this));
     });
   });
 
@@ -243,39 +229,31 @@ describe('bouncer', function() {
     });
 
     context('when there is no user session', function() {
-      it('ignores specified routes', function(done) {
-        request({
-          url: 'http://localhost:' + client.address().port + '/ignore',
+      it('ignores specified routes', function() {
+        return get({
+          url           : this.url + '/ignore',
           followRedirect: false
-        }, function(err, res) {
-          if (err) throw err;
-
+        }).spread(function(res) {
           res.body.should.eql('no redirect');
-          done();
         });
       });
     });
 
     context('when there is a user session', function() {
-      it('uses its normal middleware', function(done) {
+      it('uses its normal middleware', function() {
         var jar = request.jar();
 
-        request({
+        return get({
           jar: jar,
-          url: 'http://localhost:' + client.address().port
-        }, function(err) {
-          if (err) throw err;
-
-          request({
-            jar: jar,
-            url: 'http://localhost:' + client.address().port + '/ignore-with-session',
+          url: this.url
+        }).then(function() {
+          return get({
+            jar           : jar,
+            url           : this.url + '/ignore-with-session',
             followRedirect: false
-          }, function(err, res) {
-            if (err) throw err;
-
-            res.body.should.eql('access_token');
-            done();
           });
+        }.bind(this)).spread(function(res) {
+          res.body.should.eql('access_token');
         });
       });
     });

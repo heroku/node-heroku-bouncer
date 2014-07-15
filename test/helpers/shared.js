@@ -1,47 +1,39 @@
 'use strict';
 
+var Promise = require('bluebird');
 var request = require('request');
+var get     = Promise.promisify(request.get);
 
-exports.shouldNotRedirect = function(client, done) {
+exports.shouldNotRedirect = function(client) {
   var jar = request.jar();
 
-  request({
+  return get({
     jar: jar,
-    url: 'http://localhost:' + client.address().port
-  }, function(err) {
-    if (err) throw err;
-
-    request({
-      jar: jar,
-      url: 'http://localhost:' + client.address().port + '/hello',
+    url: this.url
+  }).then(function() {
+    return get({
+      jar           : jar,
+      url           : this.url + '/hello',
       followRedirect: false
-    }, function(err, res) {
-      if (err) throw err;
-
-      res.body.should.eql('hello world');
-      done();
     });
+  }.bind(this)).spread(function(res, body) {
+    body.should.eql('hello world');
   });
 };
 
-exports.shouldRedirect = function(client, done) {
+exports.shouldRedirect = function(client) {
   var jar = request.jar();
 
-  request({
+  return get({
     jar: jar,
-    url: 'http://localhost:' + client.address().port
-  }, function(err) {
-    if (err) throw err;
-
-    request({
-      jar: jar,
-      url: 'http://localhost:' + client.address().port + '/helloo',
+    url: this.url
+  }).then(function() {
+    return get({
+      jar           : jar,
+      url           : this.url + '/hello',
       followRedirect: false
-    }, function(err, res) {
-      if (err) throw err;
-
-      res.headers.location.should.eql('https://www.heroku.com');
-      done();
-    });
+    })
+  }.bind(this)).spread(function(res) {
+    res.headers.location.should.eql('https://www.heroku.com');
   });
 };
