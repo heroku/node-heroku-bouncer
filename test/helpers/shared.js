@@ -4,7 +4,7 @@ var Promise = require('bluebird');
 var request = require('request');
 var get     = Promise.promisify(request.get);
 
-exports.shouldNotRedirect = function(client) {
+exports.shouldNotRedirect = function() {
   var jar = request.jar();
 
   return get({
@@ -21,7 +21,7 @@ exports.shouldNotRedirect = function(client) {
   });
 };
 
-exports.shouldRedirect = function(client) {
+exports.shouldRedirect = function() {
   var jar = request.jar();
 
   return get({
@@ -32,7 +32,7 @@ exports.shouldRedirect = function(client) {
       jar           : jar,
       url           : this.url + '/hello',
       followRedirect: false
-    })
+    });
   }.bind(this)).spread(function(res) {
     res.headers.location.should.eql('https://www.heroku.com');
   });

@@ -21,14 +21,16 @@
     "oauth": "~0.9.11",
     "express": "~4.1.1",
     "heroku-client": "^1.2.0",
-    "bluebird": "^2.2.2"
+    "bluebird": "^2.2.2",
+    "request": "^2.37.0"
   },
   "devDependencies": {
     "client-sessions": "^0.6.0",
     "cookie-parser": "^1.0.1",
     "mocha": "~1.18.2",
-    "request": "~2.34.0",
-    "should": "~3.2.0-beta1"
+    "should": "~3.2.0-beta1",
+    "tough-cookie": "^0.12.1",
+    "bluebird": "^2.2.2"
   },
   "jshintConfig": {
     "eqeqeq": true,

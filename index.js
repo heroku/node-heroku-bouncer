@@ -18,9 +18,12 @@ var router     = require('./lib/router');
  *   information in the session
  * @param {String} options.herokuOAuthID an ID for a Heroku OAuth client
  * @param {String} options.herokuOAuthSecret a secret for a Heroku OAuth client
- * @param {Array} [options.ignoreRoutes=[]] an array of route regular expressions
- *   to match request routes again. If a request route matches one of these, it
- *   passes through the authentication stack instantly.
+ * @param {String} [options.sessionSyncNonce] if present, determines the name of
+ *   a cookie shared across properties under the same domain in order to keep
+ *   their sessions synchronized
+ * @param {Array} [options.ignoreRoutes=[]] an array of route regular
+ *   expressions to match request routes again. If a request route matches one
+ *   of these, it passes through the authentication stack instantly.
  * @param {String} [options.herokuAuthURL='https://id.heroku.com'] the
  *   authentication URL used
  * @param {Boolean} [options.herokaiOnly=false] whether or not to restrict this

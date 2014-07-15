@@ -3,6 +3,7 @@
 var Promise           = require('bluebird');
 var request           = require('request');
 var should            = require('should');
+var tough             = require('tough-cookie');
 var herokuStub        = require('./helpers/heroku');
 var clientHelper      = require('./helpers/client');
 var shared            = require('./helpers/shared');
@@ -15,8 +16,9 @@ describe('bouncer', function() {
   var shouldNotRedirect, shouldRedirect;
 
   before(function() {
-    shouldNotRedirect = shared.shouldNotRedirect.bind(this);
-    shouldRedirect    = shared.shouldRedirect.bind(this);
+    this.clientOptions = {};
+    shouldNotRedirect  = shared.shouldNotRedirect.bind(this);
+    shouldRedirect     = shared.shouldRedirect.bind(this);
   });
 
   beforeEach(function(done) {
@@ -44,6 +46,77 @@ describe('bouncer', function() {
   });
 
   describe('when logged in', function() {
+    var jar;
+
+    context('and sessionSyncNonce is set', function() {
+      before(function() {
+        this.clientOptions = { sessionSyncNonce: 'my_session_nonce' };
+      });
+
+      beforeEach(function() {
+        var cookie = new tough.Cookie({
+          key  : 'my_session_nonce',
+          value: 'my_session_nonce_value'
+        });
+
+        jar = request.jar();
+        jar.setCookie(cookie, this.url);
+
+        return get({
+          jar: jar,
+          url: this.url
+        });
+      });
+
+      it('adds a sessionSyncNonce to the session', function() {
+        return get({
+          jar : jar,
+          url : this.url + '/session',
+          json: true
+        }).spread(function(_, body) {
+          body.herokuBouncerSessionNonce.should.eql('my_session_nonce_value');
+        });
+      });
+
+      context('and the sessionSyncNonce has changed', function() {
+        it('asks the user to reauthorize', function() {
+          var cookie = new tough.Cookie({
+            key  : 'my_session_nonce',
+            value: 'my_new_session_nonce_value'
+          });
+
+          jar.setCookie(cookie, this.url);
+
+          return get({
+            jar           : jar,
+            url           : this.url + '/session',
+            followRedirect: false
+          }).spread(function(res) {
+            res.headers.location.should.eql('/auth/heroku');
+          });
+        });
+      });
+
+      context('and the sessionSyncNonce has been removed', function() {
+        it('asks the user to reauthorize', function() {
+          var cookie = new tough.Cookie({
+            key  : 'my_session_nonce',
+            value: null
+          });
+
+          jar.setCookie(cookie, this.url);
+
+          return get({
+            jar           : jar,
+            url           : this.url + '/session',
+            followRedirect: false
+          }).spread(function(res) {
+            res.headers.location.should.eql('/auth/heroku');
+          });
+        });
+      });
+    });
+
     context('and herokaiOnly is not set', function() {
       it('does not redirect', function() {
         return shouldNotRedirect(client);
@@ -205,6 +278,7 @@ describe('bouncer', function() {
       });
     });
 
+    // FIXME: This is a bad test.
     it('nullifies the session', function() {
       var jar = request.jar();
 
