@@ -23,6 +23,10 @@ module.exports = function(options) {
   app.use(bouncer.middleware);
   app.use(bouncer.router);
 
+  app.get('/session', function(req, res) {
+    res.json(req.session);
+  });
+
   app.get('/hello', function(req, res) {
     res.end('hello world');
   });
