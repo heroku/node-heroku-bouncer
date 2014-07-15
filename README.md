@@ -25,7 +25,7 @@ var express = require('express');
 var app     = express();
 
 app.use(require('cookie-parser')('your cookie secret'));
-app.use(require('cookie-session')({
+app.use(require('client-sessions')({
   secret: 'your session secret',
   cookie: {
     path    : '/',
