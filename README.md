@@ -24,8 +24,8 @@ object to add the OAuth-specific routes to your app:
 var express = require('express');
 var app     = express();
 
-app.use(express.cookieParser('your cookie secret'));
-app.use(express.cookieSession({
+app.use(require('cookie-parser')('your cookie secret'));
+app.use(require('cookie-session')({
   secret: 'your session secret',
   cookie: {
     path    : '/',
@@ -47,6 +47,18 @@ app.use(bouncer.router);
 app.get('/', function(req, res) {
   res.end('you are clearly logged in!');
 });
+```
+
+After requests pass through `bouncer.middleware`, they'll have a
+`heroku-bouncer` property on them:
+
+```javascript
+{
+  token: 'user-api-token',
+  id   : 'user-id',
+  name : 'user-name',
+  email: 'user-email'
+}
 ```
 
 To log a user out, send them to `/auth/heroku/logout`.
