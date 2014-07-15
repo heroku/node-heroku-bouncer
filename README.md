@@ -51,7 +51,7 @@ app.get('/', function(req, res) {
 
 To log a user out, send them to `/auth/heroku/logout`.
 
-## Options
+### Options
 
 | Options | Required? | Default | Description |
 |---------|-----------|---------|-------------|
