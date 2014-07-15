@@ -45,11 +45,23 @@ app.use(bouncer.middleware);
 app.use(bouncer.router);
 
 app.get('/', function(req, res) {
-  res.end('you must be logged in!');
+  res.end('you are clearly logged in!');
 });
 ```
 
 To log a user out, send them to `/auth/heroku/logout`.
+
+## Options
+
+| Options | Required? | Default | Description |
+|---------|-----------|---------|-------------|
+| `herokuOAuthID` | Yes | n/a | The ID of your Heroku OAuth client |
+| `herokuOAuthSecret` | Yes | n/a | The secret of your Heroku OAuth client |
+| `herokuBouncerSecret` | Yes | n/a | A random string used to encrypt your user session data |
+| `sessionSyncNonce` | No | `null` | The name of a nonce cookie to validate sessions against |
+| `ignoreRoutes` | No | `[]` | An array of regular expressions to match routes to be ignored |
+| `herokuAuthURL` | No | `"https://id.heroku.com"` | The location of the Heroku OAuth server |
+| `herokaiOnly` | No | `false` | Whether or not to restrict the app to Herokai only |
 
 ## Test
 
