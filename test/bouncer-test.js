@@ -74,6 +74,69 @@ describe('bouncer', function() {
   });
 
   context('when the user is logged in', function() {
+    it('performs the request like normal', function() {
+      return itBehavesLikeANormalRequest();
+    });
+
+    context('when the access token has expired', function() {
+      context('and the refresh errors', function() {
+        it('clears the session');
+
+        context('and it is a non-JSON GET request', function() {
+          it('redirects to /auth/heroku');
+        });
+
+        context('and it is a non-GET request', function() {
+          it('returns a 401');
+          it('returns an unable to reauthenticate error message');
+        });
+
+        context('and it is a JSON request', function() {
+          it('returns a 401');
+          it('returns an unable to reauthenticate error message');
+        });
+      });
+
+      context('and the refresh responds with a non-200 status code', function() {
+        it('clears the session');
+
+        context('and it is a non-JSON GET request', function() {
+          it('redirects to /auth/heroku');
+        });
+
+        context('and it is a non-GET request', function() {
+          it('returns a 401');
+          it('returns an unable to reauthenticate error message');
+        });
+
+        context('and it is a JSON request', function() {
+          it('returns a 401');
+          it('returns an unable to reauthenticate error message');
+        });
+      });
+
+      context('and the refresh succeeds', function() {
+        // access tokens expire in 0 seconds in mock server
+        it('sets the new access token', function() {
+          return authenticate().spread(function(client, url, jar) {
+            return get(url + '/hello-world', { jar: jar });
+          }).spread(function(res) {
+            var userSession = JSON.parse(res.headers['x-user-session']);
+            userSession.accessToken.should.eql('refresh-token');
+          });
+        });
+
+        it('sets the new expiresIn', function() {
+          return authenticate().spread(function(client, url, jar) {
+            return get(url + '/hello-world', { jar: jar });
+          }).spread(function(res) {
+            var userSession = JSON.parse(res.headers['x-user-session']);
+            userSession.expiresIn.should.eql(28800);
+          });
+        });
+      });
+    });
+
     context('and sessionSyncNonce is set', function() {
       var clientOptions, jar;
 
@@ -171,12 +234,6 @@ describe('bouncer', function() {
             });
           });
         });
-      });
-    });
-
-    context('and herokaiOnly is set to `false`', function() {
-      it('performs the request like normal', function() {
-        return itBehavesLikeANormalRequest({ herokaiOnly: false });
       });
     });
 

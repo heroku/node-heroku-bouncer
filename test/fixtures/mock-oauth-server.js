@@ -10,15 +10,15 @@ var server     = http.createServer(app);
 app.post('/oauth/token', bodyParser.urlencoded({ extended: false }), function(req, res) {
   if (req.body.grant_type === 'refresh_token') {
     res.end(JSON.stringify({
-      access_token : uuid.v4(),
+      access_token : 'refresh-token',
       refresh_token: uuid.v4(),
       expires_in   : 28800
     }));
   } else {
     res.end(JSON.stringify({
-      access_token : uuid.v4(),
+      access_token : 'original-token',
       refresh_token: uuid.v4(),
-      expires_in   : 28800
+      expires_in   : 0
     }));
   }
 });
