@@ -86,7 +86,7 @@ describe('bouncer', function() {
         });
 
         jar = request.jar();
-        return setCookie(jar, cookie);
+        jar.setCookie(cookie, 'http://localhost');
       });
 
       it('adds a sessionSyncNonce to the session', function() {
@@ -110,9 +110,9 @@ describe('bouncer', function() {
 
         it('clears the session', function() {
           return authenticate(clientOptions, jar).spread(function(client, url) {
-            return setCookie(jar, cookie).then(function() {
-              return get(url + '/hello-world', { jar: jar, followRedirect: false });
-            }).then(function() {
+            jar.setCookie(cookie, 'http://localhost');
+
+            return get(url + '/hello-world', { jar: jar, followRedirect: false }).then(function() {
               return get(url + '/ignore', { jar: jar });
             });
           }).spread(function(res) {
@@ -124,9 +124,8 @@ describe('bouncer', function() {
         context('and it is a non-JSON GET request', function() {
           it('redirects the user to reauthenticate', function() {
             return authenticate(clientOptions, jar).spread(function(client, url) {
-              return setCookie(jar, cookie).then(function() {
-                return get(url + '/hello-world', { jar: jar, followRedirect: false });
-              });
+              jar.setCookie(cookie, 'http://localhost');
+              return get(url + '/hello-world', { jar: jar, followRedirect: false });
             }).spread(function(res) {
               res.headers.location.should.eql('/auth/heroku');
             });
@@ -136,9 +135,8 @@ describe('bouncer', function() {
         context('and it is a non-GET request', function() {
           it('returns a 401', function() {
             return authenticate(clientOptions, jar).spread(function(client, url) {
-              return setCookie(jar, cookie).then(function() {
-                return post(url + '/hello-world', { jar: jar });
-              });
+              jar.setCookie(cookie, 'http://localhost');
+              return post(url + '/hello-world', { jar: jar });
             }).spread(function(res) {
               res.statusCode.should.eql(401);
             });
@@ -146,9 +144,8 @@ describe('bouncer', function() {
 
           it('returns an unauthorized message', function() {
             return authenticate(clientOptions, jar).spread(function(client, url) {
-              return setCookie(jar, cookie).then(function() {
-                return post(url + '/hello-world', { jar: jar });
-              });
+              jar.setCookie(cookie, 'http://localhost');
+              return post(url + '/hello-world', { jar: jar });
             }).spread(function(res, body) {
               JSON.parse(body).should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
             });
@@ -158,9 +155,8 @@ describe('bouncer', function() {
         context('and it is a JSON request', function() {
           it('returns a 401', function() {
             return authenticate(clientOptions, jar).spread(function(client, url) {
-              return setCookie(jar, cookie).then(function() {
-                return get(url + '/hello-world', { jar: jar, json: true });
-              });
+              jar.setCookie(cookie, 'http://localhost');
+              return get(url + '/hello-world', { jar: jar, json: true });
             }).spread(function(res) {
               res.statusCode.should.eql(401);
             });
@@ -168,9 +164,8 @@ describe('bouncer', function() {
 
           it('returns an unauthorized message', function() {
             return authenticate(clientOptions, jar).spread(function(client, url) {
-              return setCookie(jar, cookie).then(function() {
-                return get(url + '/hello-world', { jar: jar, json: true });
-              });
+              jar.setCookie(cookie, 'http://localhost');
+              return get(url + '/hello-world', { jar: jar, json: true });
             }).spread(function(res, body) {
               body.should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
             });
@@ -336,12 +331,6 @@ function itBehavesLikeANormalRequest(clientOptions) {
     return get(url + '/hello-world', { jar: jar });
   }).spread(function(res, body) {
     body.should.eql('hello world');
-  });
-}
-
-function setCookie(jar, cookie) {
-  return new Promise(function(resolve) {
-    jar.setCookie(cookie, 'http://localhost', resolve);
   });
 }
 
