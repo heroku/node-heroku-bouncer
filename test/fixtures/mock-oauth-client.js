@@ -35,10 +35,6 @@ module.exports = function(options) {
     next();
   });
 
-  app.get('/session', function(req, res) {
-    res.json(req.session);
-  });
-
   app.get('/hello-world', function(req, res) {
     res.end('hello world');
   });
