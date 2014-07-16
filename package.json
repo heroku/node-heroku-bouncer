@@ -30,7 +30,9 @@
     "mocha": "~1.18.2",
     "should": "~3.2.0-beta1",
     "tough-cookie": "^0.12.1",
-    "bluebird": "^2.2.2"
+    "bluebird": "^2.2.2",
+    "body-parser": "^1.4.3",
+    "node-uuid": "^1.4.1"
   },
   "jshintConfig": {
     "eqeqeq": true,
