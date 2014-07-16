@@ -7,6 +7,7 @@ require('./test-helper');
 
 var Promise       = require('bluebird');
 var request       = require('request');
+var tough         = require('tough-cookie');
 var createClient  = require('./helpers/create-client');
 var herokuStubber = require('./helpers/heroku');
 var get           = Promise.promisify(request.get);
@@ -15,9 +16,9 @@ var client;
 
 describe('bouncer', function() {
   afterEach(function() {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       if (client.address()) {
-        client.close(resolve)
+        client.close(resolve);
       } else {
         resolve();
       }
@@ -74,10 +75,107 @@ describe('bouncer', function() {
 
   context('when the user is logged in', function() {
     context('and sessionSyncNonce is set', function() {
-      var clientOptions;
+      var clientOptions, jar;
 
       beforeEach(function() {
         clientOptions = { sessionSyncNonce: 'my_session_nonce' };
+
+        var cookie = new tough.Cookie({
+          key  : 'my_session_nonce',
+          value: 'my_session_nonce_value'
+        });
+
+        jar = request.jar();
+        return setCookie(jar, cookie);
+      });
+
+      it('adds a sessionSyncNonce to the session', function() {
+        return authenticate(clientOptions, jar).spread(function(client, url) {
+          return get(url + '/hello-world', { jar: jar });
+        }).spread(function(res) {
+          var session = JSON.parse(res.headers['x-session']);
+          session.herokuBouncerSessionNonce.should.eql('my_session_nonce_value');
+        });
+      });
+
+      context('and the sessionSyncNonce has changed', function() {
+        var cookie;
+
+        beforeEach(function() {
+          cookie = new tough.Cookie({
+            key  : 'my_session_nonce',
+            value: 'my_new_session_nonce_value'
+          });
+        });
+
+        it('clears the session', function() {
+          return authenticate(clientOptions, jar).spread(function(client, url) {
+            return setCookie(jar, cookie).then(function() {
+              return get(url + '/hello-world', { jar: jar, followRedirect: false });
+            }).then(function() {
+              return get(url + '/ignore', { jar: jar });
+            });
+          }).spread(function(res) {
+            var session = JSON.parse(res.headers['x-session']);
+            session.should.eql({ redirectPath: '/hello-world' });
+          });
+        });
+
+        context('and it is a non-JSON GET request', function() {
+          it('redirects the user to reauthenticate', function() {
+            return authenticate(clientOptions, jar).spread(function(client, url) {
+              return setCookie(jar, cookie).then(function() {
+                return get(url + '/hello-world', { jar: jar, followRedirect: false });
+              });
+            }).spread(function(res) {
+              res.headers.location.should.eql('/auth/heroku');
+            });
+          });
+        });
+
+        context('and it is a non-GET request', function() {
+          it('returns a 401', function() {
+            return authenticate(clientOptions, jar).spread(function(client, url) {
+              return setCookie(jar, cookie).then(function() {
+                return post(url + '/hello-world', { jar: jar });
+              });
+            }).spread(function(res) {
+              res.statusCode.should.eql(401);
+            });
+          });
+
+          it('returns an unauthorized message', function() {
+            return authenticate(clientOptions, jar).spread(function(client, url) {
+              return setCookie(jar, cookie).then(function() {
+                return post(url + '/hello-world', { jar: jar });
+              });
+            }).spread(function(res, body) {
+              JSON.parse(body).should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
+            });
+          });
+        });
+
+        context('and it is a JSON request', function() {
+          it('returns a 401', function() {
+            return authenticate(clientOptions, jar).spread(function(client, url) {
+              return setCookie(jar, cookie).then(function() {
+                return get(url + '/hello-world', { jar: jar, json: true });
+              });
+            }).spread(function(res) {
+              res.statusCode.should.eql(401);
+            });
+          });
+
+          it('returns an unauthorized message', function() {
+            return authenticate(clientOptions, jar).spread(function(client, url) {
+              return setCookie(jar, cookie).then(function() {
+                return get(url + '/hello-world', { jar: jar, json: true });
+              });
+            }).spread(function(res, body) {
+              body.should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
+            });
+          });
+        });
       });
     });
 
@@ -177,11 +275,55 @@ describe('bouncer', function() {
       });
     });
   });
+
+  describe('logging out', function() {
+    it('redirects to the logout path', function() {
+      return authenticate().spread(function(client, url, jar) {
+        return get(url + '/auth/heroku/logout', { jar: jar, followRedirect: false });
+      }).spread(function(res) {
+        // `client` is set in the scope of this module :\
+        res.headers.location.should.eql('http://localhost:' + client.serverPort + '/logout');
+      });
+    });
+
+    it('clears the session', function() {
+      return authenticate().spread(function(client, url, jar) {
+        return get(url + '/auth/heroku/logout', { jar: jar, followRedirect: false }).then(function() {
+          return get(url + '/ignore', { jar: jar });
+        });
+      }).spread(function(res) {
+        var session = JSON.parse(res.headers['x-session']);
+        session.should.eql({});
+      });
+    });
+  });
+
+  describe('ignored routes', function() {
+    context('when there is no user logged in', function() {
+      it('ignores the specified routes', function() {
+        return withClient().spread(function(client, url) {
+          return get(url + '/ignore', { followRedirect: false });
+        }).spread(function(res) {
+          res.statusCode.should.eql(200);
+        });
+      });
+    });
+
+    context('when there is a user logged in', function() {
+      it('uses its normal middleware', function() {
+        return authenticate().spread(function(client, url, jar) {
+          return get(url + '/token', { jar: jar });
+        }).spread(function(res, body) {
+          body.should.not.be.empty;
+        });
+      });
+    });
+  });
 });
 
-function authenticate(clientOptions) {
+function authenticate(clientOptions, jar) {
   return withClient(clientOptions).spread(function(client, url) {
-    var jar = request.jar();
+    jar = jar || request.jar();
 
     return get(url, { jar: jar }).then(function() {
       return [client, url, jar];
@@ -194,6 +336,12 @@ function itBehavesLikeANormalRequest(clientOptions) {
     return get(url + '/hello-world', { jar: jar });
   }).spread(function(res, body) {
     body.should.eql('hello world');
+  });
+}
+
+function setCookie(jar, cookie) {
+  return new Promise(function(resolve) {
+    jar.setCookie(cookie, 'http://localhost', resolve);
   });
 }
 
