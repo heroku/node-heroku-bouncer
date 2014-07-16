@@ -12,7 +12,8 @@ module.exports = function(options) {
     herokuOAuthSecret  : 'client-secret',
     herokuBouncerSecret: 'bouncer-secret',
     herokuAuthURL      : 'http://localhost:' + oAuthServer.address().port,
-    ignoreRoutes       : [/^\/ignore/],
+    herokaiOnlyRedirect: '/herokai-only',
+    ignoreRoutes       : [/^\/ignore/, /^\/herokai-only/],
     herokaiOnly        : false
   };
 

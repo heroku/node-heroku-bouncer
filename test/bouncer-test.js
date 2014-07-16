@@ -252,48 +252,18 @@ describe('bouncer', function() {
       });
 
       context('and the user is not a Herokai', function() {
+        /*
+         * Non-GET and JSON requests for non-Herokai are not tested, because a
+         * session couldn't be established for them in the first place (since
+         * sessions are cleared on every re-auth, they coudn't establish a
+         * session with a GET first, and then do a POST with the same session).
+         */
         context('and it is a non-JSON GET request', function() {
-          it('redirects to the Heroku website', function() {
-            return authenticate(clientOptions).spread(function(client, url, jar) {
-              return get(url + '/hello-world', { jar: jar, followRedirect: false });
-            }).spread(function(res) {
-              res.headers.location.should.eql('https://www.heroku.com');
-            });
-          });
-        });
-
-        context('and it is a non-GET request', function() {
-          it('returns a 401', function() {
-            return authenticate(clientOptions).spread(function(client, url, jar) {
-              return post(url, { jar: jar });
-            }).spread(function(res) {
-              res.statusCode.should.eql(401);
-            });
-          });
-
-          it('returns a non-Herokai message', function() {
-            return authenticate(clientOptions).spread(function(client, url, jar) {
-              return post(url, { jar: jar });
+          it('redirects to the non-Herokai URL', function() {
+            return withClient(clientOptions).spread(function(client, url) {
+              return get(url + '/hello-world', { jar: true });
             }).spread(function(res, body) {
-              JSON.parse(body).should.eql({ id: 'unauthorized', message: 'This app is limited to Herokai only.' });
-            });
-          });
-        });
-
-        context('and it is a JSON request', function() {
-          it('returns a 401', function() {
-            return authenticate(clientOptions).spread(function(client, url, jar) {
-              return get(url, { jar: jar, json: true });
-            }).spread(function(res) {
-              res.statusCode.should.eql(401);
-            });
-          });
-
-          it('returns a non-Herokai message', function() {
-            return authenticate(clientOptions).spread(function(client, url, jar) {
-              return get(url, { jar: jar, json: true });
-            }).spread(function(res, body) {
-              body.should.eql({ id: 'unauthorized', message: 'This app is limited to Herokai only.' });
+              body.should.eql('herokai only');
             });
           });
         });

@@ -18,6 +18,8 @@ var router     = require('./lib/router');
  *   information in the session
  * @param {String} options.herokuOAuthID an ID for a Heroku OAuth client
  * @param {String} options.herokuOAuthSecret a secret for a Heroku OAuth client
+ * @param {String} [options.herokaiOnlyRedirect='https://www.heroku.com'] a URL
+ *   to redirect to when a user is not a Herokai and `herokaiOnly` is `true`
  * @param {String} [options.sessionSyncNonce] if present, determines the name of
  *   a cookie shared across properties under the same domain in order to keep
  *   their sessions synchronized
@@ -68,5 +70,6 @@ function enforceOptions(options) {
   }
 
   options.herokuAuthURL = options.herokuAuthURL || 'https://id.heroku.com';
+  options.herokaiOnlyRedirect = options.herokaiOnlyRedirect || 'https://www.heroku.com';
   options.herokaiOnly   = options.herokaiOnly || false;
 }

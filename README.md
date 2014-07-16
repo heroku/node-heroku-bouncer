@@ -74,6 +74,7 @@ To log a user out, send them to `/auth/heroku/logout`.
 | `ignoreRoutes` | No | `[]` | An array of regular expressions to match routes to be ignored |
 | `herokuAuthURL` | No | `"https://id.heroku.com"` | The location of the Heroku OAuth server |
 | `herokaiOnly` | No | `false` | Whether or not to restrict the app to Herokai only |
+| `herokaiOnlyRedirect` | No | `"https://www.heroku.com"` | Where to redirect non-Herokai to when using `herokaiOnly` |
 
 ## Test
 

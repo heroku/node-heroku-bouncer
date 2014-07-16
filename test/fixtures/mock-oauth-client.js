@@ -39,6 +39,10 @@ module.exports = function(options) {
     res.end('hello world');
   });
 
+  app.get('/herokai-only', function(req, res) {
+    res.end('herokai only');
+  });
+
   app.get('/ignore', function(req, res) {
     res.end('no redirect');
   });
