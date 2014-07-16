@@ -11,12 +11,23 @@ var createClient  = require('./helpers/create-client');
 var herokuStubber = require('./helpers/heroku');
 var get           = Promise.promisify(request.get);
 var post          = Promise.promisify(request.post);
+var client;
 
 describe('bouncer', function() {
+  afterEach(function() {
+    return new Promise(function(resolve, reject) {
+      if (client.address()) {
+        client.close(resolve)
+      } else {
+        resolve();
+      }
+    });
+  });
+
   describe('when the user is not logged in', function() {
     context('and it is a non-JSON GET request', function() {
       it('redirects to /auth/heroku', function() {
-        return withClient(function(client, url) {
+        return withClient().spread(function(client, url) {
           return get(url, { followRedirect: false });
         }).spread(function(res) {
           res.headers.location.should.eql('/auth/heroku');
@@ -26,7 +37,7 @@ describe('bouncer', function() {
 
     context('and it is a non-GET request', function() {
       it('returns a 401', function() {
-        return withClient(function(client, url) {
+        return withClient().spread(function(client, url) {
           return post(url);
         }).spread(function(res) {
           res.statusCode.should.eql(401);
@@ -34,7 +45,7 @@ describe('bouncer', function() {
       });
 
       it('returns an unauthorized message', function() {
-        return withClient(function(client, url) {
+        return withClient().spread(function(client, url) {
           return post(url);
         }).spread(function(res, body) {
           JSON.parse(body).should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
@@ -44,7 +55,7 @@ describe('bouncer', function() {
 
     context('and it is a JSON request', function() {
       it('returns a 401', function() {
-        return withClient(function(client, url) {
+        return withClient().spread(function(client, url) {
           return get(url, { json: true });
         }).spread(function(res) {
           res.statusCode.should.eql(401);
@@ -52,7 +63,7 @@ describe('bouncer', function() {
       });
 
       it('returns an unauthorized message', function() {
-        return withClient(function(client, url) {
+        return withClient().spread(function(client, url) {
           return get(url, { json: true });
         }).spread(function(res, body) {
           body.should.eql({ id: 'unauthorized', message: 'Please authenticate.' });
@@ -62,6 +73,14 @@ describe('bouncer', function() {
   });
 
   context('when the user is logged in', function() {
+    context('and sessionSyncNonce is set', function() {
+      var clientOptions;
+
+      beforeEach(function() {
+        clientOptions = { sessionSyncNonce: 'my_session_nonce' };
+      });
+    });
+
     context('and herokaiOnly is set to `false`', function() {
       it('performs the request like normal', function() {
         return itBehavesLikeANormalRequest({ herokaiOnly: false });
@@ -85,7 +104,7 @@ describe('bouncer', function() {
       context('and the user is not a Herokai', function() {
         context('and it is a non-JSON GET request', function() {
           it('redirects to the Heroku website', function() {
-            return authenticate(clientOptions, function(client, url, jar) {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
               return get(url + '/hello-world', { jar: jar, followRedirect: false });
             }).spread(function(res) {
               res.headers.location.should.eql('https://www.heroku.com');
@@ -95,7 +114,7 @@ describe('bouncer', function() {
 
         context('and it is a non-GET request', function() {
           it('returns a 401', function() {
-            return authenticate(clientOptions, function(client, url, jar) {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
               return post(url, { jar: jar });
             }).spread(function(res) {
               res.statusCode.should.eql(401);
@@ -103,7 +122,7 @@ describe('bouncer', function() {
           });
 
           it('returns a non-Herokai message', function() {
-            return authenticate(clientOptions, function(client, url, jar) {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
               return post(url, { jar: jar });
             }).spread(function(res, body) {
               JSON.parse(body).should.eql({ id: 'unauthorized', message: 'This app is limited to Herokai only.' });
@@ -113,7 +132,7 @@ describe('bouncer', function() {
 
         context('and it is a JSON request', function() {
           it('returns a 401', function() {
-            return authenticate(clientOptions, function(client, url, jar) {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
               return get(url, { jar: jar, json: true });
             }).spread(function(res) {
               res.statusCode.should.eql(401);
@@ -121,7 +140,7 @@ describe('bouncer', function() {
           });
 
           it('returns a non-Herokai message', function() {
-            return authenticate(clientOptions, function(client, url, jar) {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
               return get(url, { jar: jar, json: true });
             }).spread(function(res, body) {
               body.should.eql({ id: 'unauthorized', message: 'This app is limited to Herokai only.' });
@@ -149,7 +168,7 @@ describe('bouncer', function() {
 
       context('and the user is not a Herokai', function() {
         it('uses the custom request handler', function() {
-          return authenticate(clientOptions, function(client, url, jar) {
+          return authenticate(clientOptions).spread(function(client, url, jar) {
             return get(url, { jar: jar });
           }).spread(function(res, body) {
             body.should.eql('You are not a Herokai.');
@@ -160,36 +179,29 @@ describe('bouncer', function() {
   });
 });
 
-function authenticate(clientOptions, fn) {
-  var jar = request.jar();
+function authenticate(clientOptions) {
+  return withClient(clientOptions).spread(function(client, url) {
+    var jar = request.jar();
 
-  return withClient(clientOptions, function(client, url) {
     return get(url, { jar: jar }).then(function() {
-      return fn(client, url, jar);
+      return [client, url, jar];
     });
   });
 }
 
 function itBehavesLikeANormalRequest(clientOptions) {
-  return authenticate(clientOptions, function(client, url, jar) {
+  return authenticate(clientOptions).spread(function(client, url, jar) {
     return get(url + '/hello-world', { jar: jar });
   }).spread(function(res, body) {
     body.should.eql('hello world');
   });
 }
 
-function withClient(options, fn) {
-  var client;
-
-  if (typeof options === 'function') {
-    fn      = options;
-    options = null;
-  }
+function withClient(options) {
+  options = options || {};
 
   return createClient(options).spread(function(_client, url) {
     client = _client;
-    return fn(client, url);
-  }).finally(function() {
-    client.close();
+    return [client, url];
   });
 }
