@@ -341,6 +341,28 @@ describe('bouncer', function() {
       });
     });
   });
+
+  describe('redirects', function() {
+    context('when there is a redirect query param', function() {
+      it('redirects', function() {
+        return withClient().spread(function(client, url) {
+          return get(url + '/auth/heroku?redirectPath=/hello-world', { jar: request.jar() });
+        }).spread(function(res, body) {
+          body.should.eql('hello world');
+        });
+      });
+    });
+
+    context('when there is a referer header', function() {
+      it('redirects', function() {
+        return withClient().spread(function(client, url) {
+          return get(url + '/auth/heroku', { jar: request.jar(), headers: { referer: '/hello-world' } });
+        }).spread(function(res, body) {
+          body.should.eql('hello world');
+        });
+      });
+    });
+  });
 });
 
 function authenticate(clientOptions, jar) {
