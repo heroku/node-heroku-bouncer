@@ -26,12 +26,12 @@ var app     = express();
 
 app.use(require('cookie-parser')('your cookie secret'));
 app.use(require('client-sessions')({
-  secret: 'your session secret',
-  cookie: {
-    path    : '/',
-    signed  : true,
-    httpOnly: true,
-    maxAge  : null
+  cookieName    : 'session',
+  secret        : 'your session secret',
+  cookie        : {
+    path     : '/',
+    ephemeral: false,
+    httpOnly : true
   }
 }));
 
