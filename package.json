@@ -20,7 +20,7 @@
     "encryptor": "~0.1.0",
     "oauth": "~0.9.11",
     "express": "~4.1.1",
-    "heroku-client": "^1.2.0",
+    "heroku-client": "^1.6.0",
     "bluebird": "^2.2.2",
     "request": "^2.37.0"
   },
