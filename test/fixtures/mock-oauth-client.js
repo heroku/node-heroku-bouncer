@@ -7,7 +7,7 @@ module.exports = function(options) {
   var app     = express();
   var server  = http.createServer(app);
   var bouncer = require('../../index')(options);
-  var cipher  = require('encryptor')('bouncer-secret');
+  var cipher  = require('simple-encryptor')('abcd1234abcd1234');
 
   app.use(require('cookie-parser')('cookie secret'));
 
@@ -29,7 +29,7 @@ module.exports = function(options) {
     res.set('x-session', JSON.stringify(req.session));
 
     if (req.session.userSession) {
-      res.set('x-user-session', cipher.decrypt(req.session.userSession));
+      res.set('x-user-session', JSON.stringify(cipher.decrypt(req.session.userSession)));
     }
 
     next();

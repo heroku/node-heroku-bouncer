@@ -38,7 +38,7 @@ app.use(require('client-sessions')({
 var bouncer = require('heroku-bouncer')({
   herokuOAuthID      : 'client-id',
   herokuOAuthSecret  : 'client-secret',
-  herokuBouncerSecret: 'bouncer-secret'
+  herokuBouncerSecret: 'abcd1234abcd1234'
 });
 
 app.use(bouncer.middleware);

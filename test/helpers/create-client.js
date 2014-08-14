@@ -10,7 +10,7 @@ module.exports = function(options) {
   var defaultOptions = {
     herokuOAuthID      : 'client-id',
     herokuOAuthSecret  : 'client-secret',
-    herokuBouncerSecret: 'bouncer-secret',
+    herokuBouncerSecret: 'abcd1234abcd1234',
     herokuAuthURL      : 'http://localhost:' + oAuthServer.address().port,
     herokaiOnlyRedirect: '/herokai-only',
     ignoreRoutes       : [/^\/ignore/, /^\/herokai-only/],
