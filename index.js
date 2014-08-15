@@ -25,6 +25,9 @@ var routes     = require('./lib/router');
  * @param {String} options.encryptionSecret a user information encryption secret
  * @param {String} options.oAuthClientID a Heroku OAuth client ID
  * @param {String} options.oAuthClientSecret a Heroku OAuth client secret
+ * @param {String} [options.herokuAPIHost=null] optionally override the host
+ *   that API requests are sent to (defaults in the Node Heorku client to
+ *   'api.heroku.com').
  * @param {String} [options.sessionSyncNonce=null] the name of a cookie shared
  *   across different apps on the same domain to keep sessions synchronized
  * @param {Array} [options.ignoredRoutes=[] an array of regular expressions
@@ -68,10 +71,11 @@ function setOptions(options) {
   }
 
   var defaults = {
-    herokaiOnly     : null,
-    oAuthServerURL  : 'https: //id.heroku.com',
-    ignoredRoutes   : [],
-    sessionSyncNonce: null
+    herokaiOnlyHandler: null,
+    herokuAPIHost     : null,
+    ignoredRoutes     : [],
+    oAuthServerURL    : 'https: //id.heroku.com',
+    sessionSyncNonce  : null
   };
 
   for (var key in defaults) {
