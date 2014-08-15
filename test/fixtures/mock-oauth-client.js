@@ -21,8 +21,7 @@ module.exports = function(options) {
     }
   }));
 
-  app.use(bouncer.middleware);
-  app.use(bouncer.router);
+  app.use(bouncer);
 
   app.use(function(req, res, next) {
     res.set('x-cookies', JSON.stringify(req.cookies));

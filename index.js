@@ -1,7 +1,8 @@
 'use strict';
 
+var express    = require('express');
 var middleware = require('./lib/middleware');
-var router     = require('./lib/router');
+var routes     = require('./lib/router');
 
 /**
  * `heroku-bouncer` is a function which exposes two things: A piece of
@@ -43,13 +44,17 @@ var router     = require('./lib/router');
  * ```
  */
 module.exports = function(options) {
+  var router = new express.Router();
+
   options = options || {};
   enforceOptions(options);
 
-  return {
-    middleware: middleware(options),
-    router    : router(options)
-  };
+  router.middleware = middleware(options);
+  router.router     = routes(options);
+  router.use(router.middleware);
+  router.use(router.router);
+
+  return router;
 };
 
 function enforceOptions(options) {
