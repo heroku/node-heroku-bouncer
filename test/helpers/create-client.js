@@ -12,9 +12,7 @@ module.exports = function(options) {
     oAuthClientSecret  : 'client-secret',
     sessionSecret      : 'abcd1234abcd1234',
     oAuthServerURL     : 'http://localhost:' + oAuthServer.address().port,
-    herokaiOnlyRedirect: '/herokai-only',
-    ignoredRoutes      : [/^\/ignore/, /^\/herokai-only/],
-    herokaiOnly        : false
+    ignoredRoutes      : [/^\/ignore/, /^\/herokai-only/]
   };
 
   options = options || {};

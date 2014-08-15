@@ -237,11 +237,13 @@ describe('bouncer', function() {
       });
     });
 
-    context('and herokaiOnly is set to `true`', function() {
+    context('and herokaiOnly is set', function() {
       var clientOptions;
 
       beforeEach(function() {
-        clientOptions = { herokaiOnly: true };
+        clientOptions = { herokaiOnlyHandler: function(req, res) {
+          res.end('You are not a Herokai.');
+        } };
       });
 
       context('and the user is a Herokai', function() {
@@ -259,39 +261,12 @@ describe('bouncer', function() {
          * session with a GET first, and then do a POST with the same session).
          */
         context('and it is a non-JSON GET request', function() {
-          it('redirects to the non-Herokai URL', function() {
-            return withClient(clientOptions).spread(function(client, url) {
-              return get(url + '/hello-world', { jar: true });
+          it('uses the custom request handler', function() {
+            return authenticate(clientOptions).spread(function(client, url, jar) {
+              return get(url, { jar: jar });
             }).spread(function(res, body) {
-              body.should.eql('herokai only');
+              body.should.eql('You are not a Herokai.');
             });
-          });
-        });
-      });
-    });
-
-    context('and herokaiOnly is a function', function() {
-      var clientOptions;
-
-      beforeEach(function() {
-        clientOptions = { herokaiOnly: function(req, res) {
-          res.end('You are not a Herokai.');
-        } };
-      });
-
-      context('and the user is a Herokai', function() {
-        it('performs the request like normal', function() {
-          herokuStubber.stubUser({ email: 'user@heroku.com' });
-          return itBehavesLikeANormalRequest(clientOptions);
-        });
-      });
-
-      context('and the user is not a Herokai', function() {
-        it('uses the custom request handler', function() {
-          return authenticate(clientOptions).spread(function(client, url, jar) {
-            return get(url, { jar: jar });
-          }).spread(function(res, body) {
-            body.should.eql('You are not a Herokai.');
           });
         });
       });

@@ -23,4 +23,15 @@ describe('setup', function() {
       });
     }).should.throw('No `oAuthClientSecret` provided to heroku-bouncer');
   });
+
+  it('throws an error if `herokaiOnlyHandler` is not a function', function() {
+    (function() {
+      require('../index')({
+        sessionSecret     : 'foo',
+        oAuthClientID     : '123',
+        oAuthClientSecret : '123',
+        herokaiOnlyHandler: true
+      });
+    }).should.throw('`herokaiOnlyHandler` must be a handler function');
+  });
 });

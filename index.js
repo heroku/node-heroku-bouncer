@@ -32,8 +32,8 @@ var routes     = require('./lib/router');
  *   authentication stack. Only used when there is no current session.
  * @param {String} [options.oAuthServerURL='https://id.heroku.com'] the URL of
  *   the Heroku OAuth server app
- * @param {Function} [options.herokaiOnly=null] if provided, this route handler
- *   will be called on requests by non-Herokai
+ * @param {Function} [options.herokaiOnlyHandler=null] if provided, this route
+ *   handler will be called on requests by non-Herokai
  * ```
  */
 module.exports = function(options) {
@@ -61,6 +61,10 @@ function setOptions(options) {
 
   if (!options.oAuthClientSecret) {
     throw new Error('No `oAuthClientSecret` provided to heroku-bouncer');
+  }
+
+  if (options.herokaiOnlyHandler && typeof(options.herokaiOnlyHandler) !== 'function') {
+    throw new Error('`herokaiOnlyHandler` must be a handler function');
   }
 
   var defaults = {
