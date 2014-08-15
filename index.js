@@ -5,9 +5,16 @@ var middleware = require('./lib/middleware');
 var routes     = require('./lib/router');
 
 /**
- * `heroku-bouncer` is a function which exposes two things: A piece of
- * middleware to handle Heroku OAuth for a node app, and a router which exposes
- * the required OAuth endpoints (such as a callback URL), and a logout path.
+ * `heroku-bouncer` provides a router and a piece of middleware for handling
+ * Heroku OAuth sessions in a web app.
+ *
+ *     var bouncer = require('heroku-bouncer')({
+ *       sessionSecret    : process.env.SESSION_SECRET,
+ *       oAuthClientID    : process.env.HEROKU_OAUTH_ID,
+ *       oAuthClientSecret: process.env.HEROKU_OAUTH_SECRET
+ *     });
+ *
+ *     app.use(bouncer);
  *
  * @class Main
  */
@@ -15,39 +22,25 @@ var routes     = require('./lib/router');
 /**
  * @method main
  * @param {Object} options
- * @param {String} options.herokuBouncerSecret a secret used to encrypt
- *   information in the session
- * @param {String} options.herokuOAuthID an ID for a Heroku OAuth client
- * @param {String} options.herokuOAuthSecret a secret for a Heroku OAuth client
- * @param {String} [options.herokaiOnlyRedirect='https://www.heroku.com'] a URL
- *   to redirect to when a user is not a Herokai and `herokaiOnly` is `true`
- * @param {String} [options.sessionSyncNonce] if present, determines the name of
- *   a cookie shared across properties under the same domain in order to keep
- *   their sessions synchronized
- * @param {Array} [options.ignoreRoutes=[]] an array of route regular
- *   expressions to match request routes again. If a request route matches one
- *   of these, it passes through the authentication stack instantly.
- * @param {String} [options.herokuAuthURL='https://id.heroku.com'] the
- *   authentication URL used
- * @param {Boolean} [options.herokaiOnly=false] whether or not to restrict this
- *   app to Herokai (users with @heroku.com email addresses)
- * @example
- * ```javascript
- * var bouncer = require('heroku-bouncer')({
- *   herokuBouncerSecret: process.env.HEROKU_BOUNCER_SECRET,
- *   herokuOAuthID      : process.env.HEROKU_OAUTH_ID,
- *   herokuOAuthSecret  : process.env.HEROKU_OAUTH_SECRET
- * });
- *
- * app.use(bouncer.middleware);
- * app.use(bouncer.router);
+ * @param {String} options.sessionSecret a session encryption secret
+ * @param {String} options.oAuthClientID a Heroku OAuth client ID
+ * @param {String} options.oAuthClientSecret a Heroku OAuth client secret
+ * @param {String} [options.sessionSyncNonce=null] the name of a cookie shared
+ *   across different apps on the same domain to keep sessions synchronized
+ * @param {Array} [options.ignoredRoutes=[] an array of regular expressions
+ *   against which routes are tested to determine if they skip the
+ *   authentication stack. Only used when there is no current session.
+ * @param {String} [options.oAuthServerURL='https://id.heroku.com'] the URL of
+ *   the Heroku OAuth server app
+ * @param {Function} [options.herokaiOnly=null] if provided, this route handler
+ *   will be called on requests by non-Herokai
  * ```
  */
 module.exports = function(options) {
   var router = new express.Router();
 
   options = options || {};
-  enforceOptions(options);
+  setOptions(options);
 
   router.middleware = middleware(options);
   router.router     = routes(options);
@@ -57,24 +50,29 @@ module.exports = function(options) {
   return router;
 };
 
-function enforceOptions(options) {
-  if (!options.herokuBouncerSecret) {
-    throw new Error('No `herokuBouncerSecret` provided to heroku-bouncer');
+function setOptions(options) {
+  if (!options.sessionSecret) {
+    throw new Error('No `sessionSecret` provided to heroku-bouncer');
   }
 
-  if (!options.herokuOAuthID) {
-    throw new Error('No `herokuOAuthID` provided to heroku-bouncer');
+  if (!options.oAuthClientID) {
+    throw new Error('No `oAuthClientID` provided to heroku-bouncer');
   }
 
-  if (!options.herokuOAuthSecret) {
-    throw new Error('No `herokuOAuthSecret` provided to heroku-bouncer');
+  if (!options.oAuthClientSecret) {
+    throw new Error('No `oAuthClientSecret` provided to heroku-bouncer');
   }
 
-  if (!options.hasOwnProperty('ignoreRoutes')) {
-    options.ignoreRoutes = [];
-  }
+  var defaults = {
+    herokaiOnly     : null,
+    oAuthServerURL  : 'https: //id.heroku.com',
+    ignoredRoutes   : [],
+    sessionSyncNonce: null
+  };
 
-  options.herokuAuthURL = options.herokuAuthURL || 'https://id.heroku.com';
-  options.herokaiOnlyRedirect = options.herokaiOnlyRedirect || 'https://www.heroku.com';
-  options.herokaiOnly   = options.herokaiOnly || false;
+  for (var key in defaults) {
+    if (defaults.hasOwnProperty(key)) {
+      options[key] = options[key] || defaults[key];
+    }
+  }
 }

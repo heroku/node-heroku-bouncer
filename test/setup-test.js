@@ -3,24 +3,24 @@
 'use strict';
 
 describe('setup', function() {
-  it('throws an error when not given a `herokuBouncerSecret`', function() {
+  it('throws an error when not given a `sessionSecret`', function() {
     (function() {
       require('../index')();
-    }).should.throw('No `herokuBouncerSecret` provided to heroku-bouncer');
+    }).should.throw('No `sessionSecret` provided to heroku-bouncer');
   });
 
-  it('throws an error when not given a `herokuOAuthID`', function() {
+  it('throws an error when not given a `oAuthClientID`', function() {
     (function() {
-      require('../index')({ herokuBouncerSecret: 'foo' });
-    }).should.throw('No `herokuOAuthID` provided to heroku-bouncer');
+      require('../index')({ sessionSecret: 'foo' });
+    }).should.throw('No `oAuthClientID` provided to heroku-bouncer');
   });
 
-  it('throws an error when not given a `herokuOAuthSecret`', function() {
+  it('throws an error when not given a `oAuthClientSecret`', function() {
     (function() {
       require('../index')({
-        herokuBouncerSecret: 'foo',
-        herokuOAuthID: '123'
+        sessionSecret: 'foo',
+        oAuthClientID: '123'
       });
-    }).should.throw('No `herokuOAuthSecret` provided to heroku-bouncer');
+    }).should.throw('No `oAuthClientSecret` provided to heroku-bouncer');
   });
 });

@@ -8,12 +8,12 @@ oAuthServer.listen();
 
 module.exports = function(options) {
   var defaultOptions = {
-    herokuOAuthID      : 'client-id',
-    herokuOAuthSecret  : 'client-secret',
-    herokuBouncerSecret: 'abcd1234abcd1234',
-    herokuAuthURL      : 'http://localhost:' + oAuthServer.address().port,
+    oAuthClientID      : 'client-id',
+    oAuthClientSecret  : 'client-secret',
+    sessionSecret      : 'abcd1234abcd1234',
+    oAuthServerURL     : 'http://localhost:' + oAuthServer.address().port,
     herokaiOnlyRedirect: '/herokai-only',
-    ignoreRoutes       : [/^\/ignore/, /^\/herokai-only/],
+    ignoredRoutes      : [/^\/ignore/, /^\/herokai-only/],
     herokaiOnly        : false
   };
 
