@@ -9,7 +9,7 @@ var routes     = require('./lib/router');
  * Heroku OAuth sessions in a web app.
  *
  *     var bouncer = require('heroku-bouncer')({
- *       sessionSecret    : process.env.SESSION_SECRET,
+ *       encryptionSecret : process.env.USER_SESSION_SECRET,
  *       oAuthClientID    : process.env.HEROKU_OAUTH_ID,
  *       oAuthClientSecret: process.env.HEROKU_OAUTH_SECRET
  *     });
@@ -22,7 +22,7 @@ var routes     = require('./lib/router');
 /**
  * @method main
  * @param {Object} options
- * @param {String} options.sessionSecret a session encryption secret
+ * @param {String} options.encryptionSecret a user information encryption secret
  * @param {String} options.oAuthClientID a Heroku OAuth client ID
  * @param {String} options.oAuthClientSecret a Heroku OAuth client secret
  * @param {String} [options.sessionSyncNonce=null] the name of a cookie shared
@@ -51,8 +51,8 @@ module.exports = function(options) {
 };
 
 function setOptions(options) {
-  if (!options.sessionSecret) {
-    throw new Error('No `sessionSecret` provided to heroku-bouncer');
+  if (!options.encryptionSecret) {
+    throw new Error('No `encryptionSecret` provided to heroku-bouncer');
   }
 
   if (!options.oAuthClientID) {

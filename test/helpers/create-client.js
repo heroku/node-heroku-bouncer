@@ -10,7 +10,7 @@ module.exports = function(options) {
   var defaultOptions = {
     oAuthClientID      : 'client-id',
     oAuthClientSecret  : 'client-secret',
-    sessionSecret      : 'abcd1234abcd1234',
+    encryptionSecret   : 'abcd1234abcd1234',
     oAuthServerURL     : 'http://localhost:' + oAuthServer.address().port,
     ignoredRoutes      : [/^\/ignore/, /^\/herokai-only/]
   };
