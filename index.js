@@ -74,7 +74,7 @@ function setOptions(options) {
     herokaiOnlyHandler: null,
     herokuAPIHost     : null,
     ignoredRoutes     : [],
-    oAuthServerURL    : 'https: //id.heroku.com',
+    oAuthServerURL    : 'https://id.heroku.com',
     sessionSyncNonce  : null
   };
 
