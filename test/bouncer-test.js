@@ -141,7 +141,7 @@ describe('bouncer', function() {
           herokuStubber.stubUser({ email: undefined });
         });
 
-        it.only('forces to reauthenticate', function() {
+        it('forces to reauthenticate', function() {
           return withClient().spread(function(client, url) {
             return get(url, { followRedirect: false });
           }).spread(function(res) {
