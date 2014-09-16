@@ -135,6 +135,20 @@ describe('bouncer', function() {
           });
         });
       });
+
+      context('and userSession does not contain user info', function() {
+        beforeEach(function(){
+          herokuStubber.stubUser({ email: undefined });
+        });
+
+        it.only('forces to reauthenticate', function() {
+          return withClient().spread(function(client, url) {
+            return get(url, { followRedirect: false });
+          }).spread(function(res) {
+            res.headers.location.should.eql('/auth/heroku');
+          });
+        });
+      });
     });
 
     context('and sessionSyncNonce is set', function() {
