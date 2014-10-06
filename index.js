@@ -75,7 +75,8 @@ function setOptions(options) {
     herokuAPIHost     : null,
     ignoredRoutes     : [],
     oAuthServerURL    : 'https://id.heroku.com',
-    sessionSyncNonce  : null
+    oAuthScope        : 'identity',
+    sessionSyncNonce  : null,
   };
 
   for (var key in defaults) {
