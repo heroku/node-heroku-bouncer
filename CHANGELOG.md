@@ -13,6 +13,6 @@
   - `herokaiOnly` and `herokaiOnlyRedirect` replaced by `herokaiOnlyHandler`
   - `ignoreRoutes` becomes `ignoredRoutes`
   - Adds `herokuAPIHost` option
-- Use "identity" scope by default (since identity defaults to more dangerous "global")
+  - Adds `oAuthScope` option (defaults to `"identity"` instead of Heroku OAuth default `"global"`)
 - Check session object for user and user email to verify user presence
 - Require cookie-parser and client-sessions middlewares
