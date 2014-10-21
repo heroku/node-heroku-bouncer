@@ -76,6 +76,7 @@ To log a user out, send them to `/auth/heroku/logout`.
 | `encryptionSecret` | Yes | n/a | A random string used to encrypt your user session data |
 | `oAuthClientID` | Yes | n/a | The ID of your Heroku OAuth client |
 | `oAuthClientSecret` | Yes | n/a | The secret of your Heroku OAuth client |
+| `oAuthScope` | No | `"identity"` | The requested [scope][scope] for the authorization |
 | `herokuAPIHost` | No | n/a | An optional override host to send Heroku API requests to |
 | `sessionSyncNonce` | No | `null` | The name of a nonce cookie to validate sessions against |
 | `ignoredRoutes` | No | `[]` | An array of regular expressions to match routes to be ignored when there is no session active |
@@ -90,3 +91,4 @@ $ npm test
 
 [cookieParser]:   https://github.com/expressjs/cookie-parser
 [clientSessions]: https://github.com/mozilla/node-client-sessions
+[scope]:          https://devcenter.heroku.com/articles/oauth#scopes
