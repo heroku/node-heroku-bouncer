@@ -4,5 +4,15 @@
 
 # v4.0.0
 
+- Exposes a *single* middleware
+- Changes to options:
+  - `herokuOAuthID` becomes `oAuthClientID`
+  - `herokuOAuthSecret` becomes `oAuthClientSecret`
+  - `herokuBouncerSecret` becomes `encryptionSecret`
+  - `herokuAuthURL` becomes `oAuthServerURL`
+  - `herokaiOnly` and `herokaiOnlyRedirect` replaced by `herokaiOnlyHandler`
+  - `ignoreRoutes` becomes `ignoredRoutes`
+  - Adds `herokuAPIHost` option
 - Use "identity" scope by default (since identity defaults to more dangerous "global")
 - Check session object for user and user email to verify user presence
+- Require cookie-parser and client-sessions middlewares
