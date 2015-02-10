@@ -70,6 +70,24 @@ function setOptions(options) {
     throw new Error('`herokaiOnlyHandler` must be a handler function');
   }
 
+  if (options.authCallback && typeof(options.authCallback) !== 'function') {
+    throw new Error('`authCallback` must be a handler function');
+  }
+
+  if (options.authCallbackFailed && typeof(options.authCallbackFailed) !== 'function') {
+    throw new Error('`authCallbackFailed` must be a handler function');
+  }
+
+  if (options.authCallback && options.herokaiOnlyHandler) {
+    throw new Error('can\'t pass both `herokaiOnlyHandler` and `authCallback`');
+  }
+
+  // backwards-compat for herokaiOnlyHandler
+  if (options.herokaiOnlyHandler) {
+    options.authCallback = function(user) { return /@heroku\.com$/.test(user.email); };
+    options.authCallbackFailedHandler = options.herokaiOnlyHandler;
+  }
+
   var defaults = {
     herokaiOnlyHandler: null,
     herokuAPIHost     : null,
@@ -77,6 +95,8 @@ function setOptions(options) {
     oAuthServerURL    : 'https://id.heroku.com',
     oAuthScope        : 'identity',
     sessionSyncNonce  : null,
+    authCallback      : null,
+    authCallbackFailedHandler: null,
   };
 
   for (var key in defaults) {

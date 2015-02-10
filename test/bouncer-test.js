@@ -285,6 +285,24 @@ describe('bouncer', function() {
         });
       });
     });
+
+    context('and authCallback is set', function() {
+      var clientOptions;
+
+      beforeEach(function() {
+        clientOptions = { 
+          authCallback: function(user) { return /@example\.com$/.test(user.email) }, 
+          authCallbackFailedHandler: function(req, res) { res.end('You are not allowed.'); } 
+        };
+      });
+
+      context('and the user is authorized', function() {
+        it('performs the request like normal', function() {
+          herokuStubber.stubUser({ email: 'user@example.com' });
+          return itBehavesLikeANormalRequest(clientOptions);
+        });
+      });
+    });
   });
 
   describe('logging out', function() {
