@@ -81,7 +81,8 @@ To log a user out, send them to `/auth/heroku/logout`.
 | `sessionSyncNonce` | No | `null` | The name of a nonce cookie to validate sessions against |
 | `ignoredRoutes` | No | `[]` | An array of regular expressions to match routes to be ignored when there is no session active |
 | `oAuthServerURL` | No | `"https://id.heroku.com"` | The location of the Heroku OAuth server |
-| `herokaiOnlyHandler` | No | `null` | A route handler that will be called on requests by non-Herokai |
+| `authCallback` | No | `null` | An authorization callback that will be passed the [account object](https://devcenter.heroku.com/articles/platform-api-reference#account). Return `true` to allow access; `false` to not. |
+| `authCallbackFailedHandler` | No | `null` | A route handler called if `authCallback` returns `false` |
 
 ## Test
 
