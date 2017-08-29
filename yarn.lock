@@ -1186,6 +1186,10 @@ safe-buffer@^5.0.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
 
+scmp@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/scmp/-/scmp-0.0.3.tgz#3648df2d7294641e7f78673ffc29681d9bad9073"
+
 semver@5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.3.0.tgz#9b2ce5d3de02d17c6012ad326aa6b4d0cf54f94f"
@@ -1228,6 +1232,12 @@ shelljs@^0.7.5:
     glob "^7.0.0"
     interpret "^1.0.0"
     rechoir "^0.6.2"
+
+simple-encryptor@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/simple-encryptor/-/simple-encryptor-1.1.0.tgz#653bb1926c8f0fc2b8d7038577cc846053263ae8"
+  dependencies:
+    scmp "0.0.3"
 
 slice-ansi@0.0.4:
   version "0.0.4"

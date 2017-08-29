@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "http-call": "^2.1.5",
+    "simple-encryptor": "^1.1.0",
     "uuid": "^3.1.0"
   }
 }
