@@ -26,10 +26,10 @@
   },
   "devDependencies": {
     "client-sessions": "^0.6.0",
-    "cookie-parser": "^1.0.1",
+    "cookie-parser": "^1.4.3",
     "mocha": "~1.18.2",
     "should": "~3.2.0-beta1",
-    "tough-cookie": "^0.12.1",
+    "tough-cookie": "^2.3.4",
     "bluebird": "^2.2.2",
     "body-parser": "^1.4.3",
     "node-uuid": "^1.4.1"
