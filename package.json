@@ -21,7 +21,7 @@
     "express": "~4.16.3",
     "heroku-client": "^1.6.0",
     "bluebird": "^2.2.2",
-    "request": "^2.37.0",
+    "request": "^2.85.0",
     "simple-encryptor": "^1.0.2"
   },
   "devDependencies": {
