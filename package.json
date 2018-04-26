@@ -1,6 +1,6 @@
 {
   "name": "heroku-bouncer",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "description": "heroku bouncer middleware for express",
   "main": "index.js",
   "scripts": {
@@ -18,18 +18,18 @@
   "homepage": "https://github.com/jclem/node-heroku-bouncer",
   "dependencies": {
     "oauth": "~0.9.11",
-    "express": "~4.1.1",
+    "express": "~4.16.3",
     "heroku-client": "^1.6.0",
     "bluebird": "^2.2.2",
-    "request": "^2.37.0",
+    "request": "^2.85.0",
     "simple-encryptor": "^1.0.2"
   },
   "devDependencies": {
     "client-sessions": "^0.6.0",
-    "cookie-parser": "^1.0.1",
+    "cookie-parser": "^1.4.3",
     "mocha": "~1.18.2",
     "should": "~3.2.0-beta1",
-    "tough-cookie": "^0.12.1",
+    "tough-cookie": "^2.3.4",
     "bluebird": "^2.2.2",
     "body-parser": "^1.4.3",
     "node-uuid": "^1.4.1"
