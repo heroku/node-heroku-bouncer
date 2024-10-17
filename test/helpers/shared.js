@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird');
 var request = require('request');
-var get     = Promise.promisify(request.get);
+var get = Promise.promisify(request.get, { multiArgs: true });
 
 exports.shouldNotRedirect = function() {
   var jar = request.jar();

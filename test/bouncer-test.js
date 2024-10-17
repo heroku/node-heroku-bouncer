@@ -10,8 +10,8 @@ var request       = require('request');
 var tough         = require('tough-cookie');
 var createClient  = require('./helpers/create-client');
 var herokuStubber = require('./helpers/heroku');
-var get           = Promise.promisify(request.get);
-var post          = Promise.promisify(request.post);
+var get = Promise.promisify(request.get, { multiArgs: true });
+var post = Promise.promisify(request.post, { multiArgs: true });
 var client;
 
 describe('bouncer', function() {

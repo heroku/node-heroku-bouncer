@@ -4,7 +4,7 @@
   "description": "heroku bouncer middleware for express",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "$(npm bin)/mocha"
   },
   "repository": {
     "type": "git",
@@ -18,20 +18,19 @@
   "homepage": "https://github.com/jclem/node-heroku-bouncer",
   "dependencies": {
     "oauth": "~0.9.11",
-    "express": "~4.16.3",
+    "express": "~4.21.1",
     "heroku-client": "^1.6.0",
-    "bluebird": "^2.2.2",
+    "bluebird": "^3.7.2",
     "request": "^2.85.0",
     "simple-encryptor": "^1.0.2"
   },
   "devDependencies": {
     "client-sessions": "^0.6.0",
     "cookie-parser": "^1.4.3",
-    "mocha": "~1.18.2",
+    "mocha": "~10.7.3",
     "should": "~3.2.0-beta1",
     "tough-cookie": "^2.3.4",
-    "bluebird": "^2.2.2",
-    "body-parser": "^1.4.3",
+    "body-parser": "^1.20.3",
     "node-uuid": "^1.4.1"
   },
   "jshintConfig": {
