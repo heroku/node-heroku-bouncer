@@ -60,5 +60,8 @@
       "process": false,
       "require": false
     }
+  },
+  "resolutions": {
+    "request/form-data": "^2.5.5"
   }
 }
