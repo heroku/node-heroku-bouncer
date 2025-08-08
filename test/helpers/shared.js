@@ -1,15 +1,19 @@
 'use strict';
 
 var Promise = require('bluebird');
-var httpUtils = require('./http-utils');
-var get     = function(url, options) { return Promise.resolve(httpUtils.get(url, options)); };
+var request = require('request');
+var get     = Promise.promisify(request.get);
 
 exports.shouldNotRedirect = function() {
-  var httpJar = httpUtils.jar();
+  var jar = request.jar();
 
-  return get(this.url, { jar: httpJar }).then(function() {
-    return get(this.url + '/hello', {
-      jar           : httpJar,
+  return get({
+    jar: jar,
+    url: this.url
+  }).then(function() {
+    return get({
+      jar           : jar,
+      url           : this.url + '/hello',
       followRedirect: false
     });
   }.bind(this)).spread(function(res, body) {
@@ -18,11 +22,15 @@ exports.shouldNotRedirect = function() {
 };
 
 exports.shouldRedirect = function() {
-  var jar = httpUtils.jar();
+  var jar = request.jar();
 
-  return get(this.url, { jar: jar }).then(function() {
-    return get(this.url + '/hello', {
+  return get({
+    jar: jar,
+    url: this.url
+  }).then(function() {
+    return get({
       jar           : jar,
+      url           : this.url + '/hello',
       followRedirect: false
     });
   }.bind(this)).spread(function(res) {

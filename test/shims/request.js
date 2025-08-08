@@ -20,6 +20,16 @@ function coerceOptions(urlOrOptions, maybeOptions) {
   return urlOrOptions || {};
 }
 
+function normalizeArgs(urlOrOptions, maybeOptions, callback) {
+  // Support signatures: (url, cb), (url, options, cb), (options, cb)
+  if (typeof maybeOptions === 'function' && callback === undefined) {
+    callback = maybeOptions;
+    maybeOptions = undefined;
+  }
+  const options = coerceOptions(urlOrOptions, maybeOptions);
+  return { options, callback };
+}
+
 function applyRedirectHeaderCompatibility(options, response) {
   if (options.followRedirect === false && (response.statusCode === 301 || response.statusCode === 302)) {
     const location = response.headers.location;
@@ -63,7 +73,9 @@ function handleJsonFallback(options, response, body) {
 }
 
 function get(urlOrOptions, maybeOptions, callback) {
-  const options = coerceOptions(urlOrOptions, maybeOptions);
+  const args = normalizeArgs(urlOrOptions, maybeOptions, callback);
+  const options = args.options;
+  const cb = args.callback;
   const gotOptions = buildGotOptions(options, 'GET');
 
   got(options.url, gotOptions)
@@ -71,15 +83,17 @@ function get(urlOrOptions, maybeOptions, callback) {
       const response = toResponse(res);
       applyRedirectHeaderCompatibility(options, response);
       const body = handleJsonFallback(options, response, res.body);
-      callback && callback(null, response, body);
+      cb && cb(null, response, body);
     })
     .catch(err => {
-      callback && callback(err);
+      cb && cb(err);
     });
 }
 
 function post(urlOrOptions, maybeOptions, callback) {
-  const options = coerceOptions(urlOrOptions, maybeOptions);
+  const args = normalizeArgs(urlOrOptions, maybeOptions, callback);
+  const options = args.options;
+  const cb = args.callback;
   const gotOptions = buildGotOptions(options, 'POST');
 
   got(options.url, gotOptions)
@@ -87,10 +101,10 @@ function post(urlOrOptions, maybeOptions, callback) {
       const response = toResponse(res);
       applyRedirectHeaderCompatibility(options, response);
       const body = handleJsonFallback(options, response, res.body);
-      callback && callback(null, response, body);
+      cb && cb(null, response, body);
     })
     .catch(err => {
-      callback && callback(err);
+      cb && cb(err);
     });
 }
 

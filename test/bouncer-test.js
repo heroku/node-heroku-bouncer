@@ -6,13 +6,12 @@ require('should');
 require('./test-helper');
 
 var Promise       = require('bluebird');
+var request       = require('request');
 var tough         = require('tough-cookie');
 var createClient  = require('./helpers/create-client');
 var herokuStubber = require('./helpers/heroku');
-var httpUtils     = require('./helpers/http-utils');
-var get           = function(url, options) { return Promise.resolve(httpUtils.get(url, options)); };
-var post          = function(url, options) { return Promise.resolve(httpUtils.post(url, options)); };
-var oAuthServer  = require('./fixtures/mock-oauth-server');
+var get           = Promise.promisify(request.get);
+var post          = Promise.promisify(request.post);
 var client;
 
 describe('bouncer', function() {
@@ -163,7 +162,7 @@ describe('bouncer', function() {
           value: 'my_session_nonce_value'
         });
 
-        jar = httpUtils.jar();
+        jar = request.jar();
         jar.setCookie(cookie, 'http://localhost');
       });
 
@@ -336,7 +335,7 @@ describe('bouncer', function() {
     context('when there is a redirect query param', function() {
       it('redirects', function() {
         return withClient().spread(function(client, url) {
-          return get(url + '/auth/heroku?redirectPath=/hello-world', { jar: httpUtils.jar() });
+          return get(url + '/auth/heroku?redirectPath=/hello-world', { jar: request.jar() });
         }).spread(function(res, body) {
           body.should.eql('hello world');
         });
@@ -346,7 +345,7 @@ describe('bouncer', function() {
     context('when there is a referer header', function() {
       it('redirects', function() {
         return withClient().spread(function(client, url) {
-          return get(url + '/auth/heroku', { jar: httpUtils.jar(), headers: { referer: '/hello-world' } });
+          return get(url + '/auth/heroku', { jar: request.jar(), headers: { referer: '/hello-world' } });
         }).spread(function(res, body) {
           body.should.eql('hello world');
         });
@@ -357,7 +356,7 @@ describe('bouncer', function() {
 
 function authenticate(clientOptions, jar) {
   return withClient(clientOptions).spread(function(client, url) {
-    jar = jar || httpUtils.jar();
+    jar = jar || request.jar();
 
     return get(url, { jar: jar }).then(function() {
       return [client, url, jar];
