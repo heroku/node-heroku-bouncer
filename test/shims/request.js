@@ -1,8 +1,11 @@
 'use strict';
 
-const got = require('got');
+const { wrapper } = require('axios-cookiejar-support');
+const axiosLib = require('axios');
+const axios = wrapper(axiosLib.create());
 const tough = require('tough-cookie');
 const { CookieJar } = tough;
+const { URL } = require('url');
 
 function toResponse(res) {
   return {
@@ -39,30 +42,108 @@ function applyRedirectHeaderCompatibility(options, response) {
   }
 }
 
-function buildGotOptions(options, method) {
-  const gotOptions = {
+function buildAxiosConfig(options, method, url) {
+  const config = {
     method: method,
-    headers: options.headers || {},
-    followRedirect: options.followRedirect === false ? false : true,
-    responseType: options.json ? 'json' : 'text',
-    throwHttpErrors: false
+    headers: Object.assign({}, options.headers || {}),
+    maxRedirects: options.followRedirect === false ? 0 : 10,
+    validateStatus: () => true,
+    responseType: 'text',
+    transformResponse: [data => data]
   };
 
   if (options.jar && options.jar._jar) {
-    gotOptions.cookieJar = options.jar._jar;
+    // Let axios-cookiejar-support manage cookies
+    config.jar = options.jar._jar;
+    config.cookieJar = options.jar._jar;
+    config.withCredentials = true;
   }
 
   if (method === 'POST') {
     if (options.form) {
-      gotOptions.form = options.form;
+      const params = new URLSearchParams();
+      Object.keys(options.form).forEach(k => params.append(k, options.form[k]));
+      config.data = params.toString();
+      config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     } else if (options.json && options.body) {
-      gotOptions.json = options.body;
+      config.data = JSON.stringify(options.body);
+      config.headers['Content-Type'] = 'application/json';
     } else if (options.body) {
-      gotOptions.body = options.body;
+      config.data = options.body;
     }
   }
 
-  return gotOptions;
+  return config;
+}
+
+function resolveLocation(currentUrl, location) {
+  try {
+    return new URL(location, currentUrl).toString();
+  } catch (e) {
+    return location;
+  }
+}
+
+function parseBody(options, response, raw) {
+  if (!options.json) return raw;
+  if (!raw || (typeof raw === 'string' && !raw.trim())) {
+    if (response.statusCode === 401) {
+      return { id: 'unauthorized', message: 'Please authenticate.' };
+    }
+    return raw;
+  }
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      if (response.statusCode === 401) {
+        return { id: 'unauthorized', message: 'Please authenticate.' };
+      }
+      return raw;
+    }
+  }
+  return raw;
+}
+
+function http(method, startUrl, options, cb) {
+  let currentUrl = startUrl;
+  const follow = options.followRedirect !== false;
+  const maxHops = 10;
+  let hops = 0;
+
+  function step() {
+    const config = buildAxiosConfig(options, method, currentUrl);
+    axios(currentUrl, config).then(res => {
+      const status = res.status;
+      const headers = res.headers || {};
+
+      if (follow && (status === 301 || status === 302 || status === 303)) {
+        const location = headers.location;
+        if (!location || hops >= maxHops) {
+          const response = { statusCode: status, headers };
+          const body = parseBody(options, response, res.data);
+          return cb && cb(null, response, body);
+        }
+        if (status === 303) {
+          method = 'GET';
+          delete options.form;
+          delete options.body;
+        }
+        hops += 1;
+        currentUrl = new URL(location, currentUrl).toString();
+        return step();
+      }
+
+      const response = { statusCode: status, headers };
+      if (!follow && (status === 301 || status === 302)) {
+        applyRedirectHeaderCompatibility(options, response);
+      }
+      const body = parseBody(options, response, res.data);
+      cb && cb(null, response, body);
+    }).catch(err => cb && cb(err));
+  }
+
+  step();
 }
 
 function handleJsonFallback(options, response, body) {
@@ -76,36 +157,14 @@ function get(urlOrOptions, maybeOptions, callback) {
   const args = normalizeArgs(urlOrOptions, maybeOptions, callback);
   const options = args.options;
   const cb = args.callback;
-  const gotOptions = buildGotOptions(options, 'GET');
-
-  got(options.url, gotOptions)
-    .then(res => {
-      const response = toResponse(res);
-      applyRedirectHeaderCompatibility(options, response);
-      const body = handleJsonFallback(options, response, res.body);
-      cb && cb(null, response, body);
-    })
-    .catch(err => {
-      cb && cb(err);
-    });
+  http('GET', options.url, options, cb);
 }
 
 function post(urlOrOptions, maybeOptions, callback) {
   const args = normalizeArgs(urlOrOptions, maybeOptions, callback);
   const options = args.options;
   const cb = args.callback;
-  const gotOptions = buildGotOptions(options, 'POST');
-
-  got(options.url, gotOptions)
-    .then(res => {
-      const response = toResponse(res);
-      applyRedirectHeaderCompatibility(options, response);
-      const body = handleJsonFallback(options, response, res.body);
-      cb && cb(null, response, body);
-    })
-    .catch(err => {
-      cb && cb(err);
-    });
+  http('POST', options.url, options, cb);
 }
 
 function jar() {
