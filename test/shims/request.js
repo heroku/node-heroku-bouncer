@@ -1,16 +1,6 @@
 'use strict';
 
-const axiosLib = require('axios');
-
-// Lazy initialization of axios with cookie support
-let axiosInstance;
-async function getAxiosInstance() {
-  if (!axiosInstance) {
-    const { wrapper } = await import('./axios-cookiejar-support-wrap.mjs');
-    axiosInstance = wrapper(axiosLib.create());
-  }
-  return axiosInstance;
-}
+const axios = require('axios');
 const tough = require('tough-cookie');
 const { CookieJar } = tough;
 const { URL } = require('url');
@@ -54,7 +44,7 @@ function buildAxiosConfig(options, method, url) {
   const config = {
     method: method,
     headers: Object.assign({}, options.headers || {}),
-    maxRedirects: options.followRedirect === false ? 0 : 10,
+    maxRedirects: 0,
     validateStatus: () => true,
     responseType: 'text',
     transformResponse: [data => data]
@@ -71,10 +61,10 @@ function buildAxiosConfig(options, method, url) {
   }
 
   if (options.jar && options.jar._jar) {
-    // Let axios-cookiejar-support manage cookies
-    config.jar = options.jar._jar;
-    config.cookieJar = options.jar._jar;
-    config.withCredentials = true;
+    const cookieHeader = options.jar.getCookieStringSync(url);
+    if (cookieHeader) {
+      config.headers.cookie = cookieHeader;
+    }
   }
 
   if (method === 'POST') {
@@ -123,24 +113,51 @@ function parseBody(options, response, raw) {
   return raw;
 }
 
-async function http(method, startUrl, options, cb) {
-  try {
-    const axios = await getAxiosInstance();
-    const follow = options.followRedirect !== false;
-    const config = buildAxiosConfig(options, method, startUrl);
-    // Let axios handle redirects based on maxRedirects in config
-    const res = await axios(startUrl, config);
-    const status = res.status;
-    const headers = res.headers || {};
-    const response = { statusCode: status, headers };
-    if (!follow && (status === 301 || status === 302)) {
-      applyRedirectHeaderCompatibility(options, response);
-    }
-    const body = parseBody(options, response, res.data);
-    cb && cb(null, response, body);
-  } catch (err) {
-    cb && cb(err);
+function http(method, startUrl, options, cb) {
+  let currentUrl = startUrl;
+  const follow = options.followRedirect !== false;
+  const maxHops = 10;
+  let hops = 0;
+
+  function step() {
+    const config = buildAxiosConfig(options, method, currentUrl);
+    axios(currentUrl, config).then(res => {
+      const status = res.status;
+      const headers = res.headers || {};
+
+      // Persist Set-Cookie into jar
+      if (options.jar && headers['set-cookie']) {
+        const setCookies = headers['set-cookie'];
+        setCookies.forEach(c => options.jar.setCookieSync(c, currentUrl));
+      }
+
+      if (follow && (status === 301 || status === 302 || status === 303)) {
+        const location = headers.location;
+        if (!location || hops >= maxHops) {
+          const response = { statusCode: status, headers };
+          const body = parseBody(options, response, res.data);
+          return cb && cb(null, response, body);
+        }
+        if (status === 303) {
+          method = 'GET';
+          delete options.form;
+          delete options.body;
+        }
+        hops += 1;
+        currentUrl = new URL(location, currentUrl).toString();
+        return step();
+      }
+
+      const response = { statusCode: status, headers };
+      if (!follow && (status === 301 || status === 302)) {
+        applyRedirectHeaderCompatibility(options, response);
+      }
+      const body = parseBody(options, response, res.data);
+      cb && cb(null, response, body);
+    }).catch(err => cb && cb(err));
   }
+
+  step();
 }
 
 function handleJsonFallback(options, response, body) {
