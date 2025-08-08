@@ -1,6 +1,6 @@
 {
   "name": "heroku-bouncer",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "heroku bouncer middleware for express",
   "main": "index.js",
   "scripts": {
@@ -60,5 +60,8 @@
       "process": false,
       "require": false
     }
+  },
+  "resolutions": {
+    "request/form-data": "^2.5.5"
   }
 }
