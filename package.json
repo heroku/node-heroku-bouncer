@@ -4,7 +4,7 @@
   "description": "heroku bouncer middleware for express",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --exit"
+    "test": "mocha --exit --require test/shims/register-request-shim.js"
   },
   "repository": {
     "type": "git",
