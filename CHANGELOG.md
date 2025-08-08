@@ -1,3 +1,11 @@
+# v5.0.2
+
+- Replace deprecated `request` with maintained `got` internally for token refresh
+- No public API changes; middleware behavior and responses unchanged
+- Tests run unchanged via a test-time `request` shim backed by `got`
+- Test command uses `--exit` for reliable termination
+- Checkpoint: tests refactored without shim at commit `923438edb96f66284ed61e73d67e1300d0208b27`
+
 # v4.0.1
 
 - Bump to v4.0.1, as NPM claims I published v4.0.0 two weeks ago!?
