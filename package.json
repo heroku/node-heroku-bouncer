@@ -18,7 +18,7 @@
   "homepage": "https://github.com/jclem/node-heroku-bouncer",
   "dependencies": {
     "oauth": "~0.9.11",
-    "express": "~4.16.3",
+    "express": "~4.20.0",
     "heroku-client": "^1.6.0",
     "bluebird": "^2.2.2",
     "axios": "^1.7.7",
