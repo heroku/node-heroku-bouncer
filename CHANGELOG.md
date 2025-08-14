@@ -1,3 +1,10 @@
+# v5.0.2
+
+- Replace deprecated `request` with maintained `axios` internally for token refresh
+- No public API changes; middleware behavior and responses unchanged
+- Tests run unchanged via a test-time `request` shim backed by `got`
+- Test command uses `--exit` for reliable termination
+
 # v4.0.1
 
 - Bump to v4.0.1, as NPM claims I published v4.0.0 two weeks ago!?
