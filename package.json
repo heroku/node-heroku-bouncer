@@ -8,19 +8,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jclem/node-heroku-bouncer"
+    "url": "https://github.com/heroku/node-heroku-bouncer"
   },
   "author": "Jonathan Clem",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jclem/node-heroku-bouncer/issues"
+    "url": "https://github.com/heroku/node-heroku-bouncer/issues"
   },
-  "homepage": "https://github.com/jclem/node-heroku-bouncer",
+  "homepage": "https://github.com/heroku/node-heroku-bouncer",
   "dependencies": {
     "axios": "^1.7.7",
     "bluebird": "^2.2.2",
     "express": "^4.16.3",
-    "heroku-client": "^1.6.0",
+    "heroku-client": "git+https://github.com/heroku/node-heroku-client.git#barretts/aggressive-upgrade",
     "oauth": "~0.9.11",
     "simple-encryptor": "^1.0.2"
   },
