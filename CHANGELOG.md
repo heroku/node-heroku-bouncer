@@ -1,3 +1,7 @@
+# Unreleased
+
+- Fix a process crash on `/auth/heroku/callback`: a failed OAuth code exchange or account lookup (a rejected or expired code, an unreachable identity server or API) threw from an async callback and took down the whole host app. These failures are now passed to Express with a 401 (code rejected) or 502 (upstream failure) status and a generic message.
+
 # v5.0.2
 
 - Replace deprecated `request` with maintained `axios` internally for token refresh
